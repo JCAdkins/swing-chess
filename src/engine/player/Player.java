@@ -30,7 +30,7 @@ public abstract class Player {
         pieces.add(new Bishop(isAI,new Coordinate(2,PIECE_START), new Coordinate(GlobalVars.convertToPixelX(2, GlobalVars.BASE_WIDTH), GlobalVars.convertToPixelY(PIECE_START, GlobalVars.BASE_HEIGHT)), team, pieceImages[GlobalVars.P1_BISHOP]));
         pieces.add(new Bishop(isAI,new Coordinate(5, PIECE_START), new Coordinate(GlobalVars.convertToPixelX(5, GlobalVars.BASE_WIDTH), GlobalVars.convertToPixelY(PIECE_START, GlobalVars.BASE_HEIGHT)), team, pieceImages[GlobalVars.P1_BISHOP]));
         pieces.add(new Queen(isAI,new Coordinate(3,PIECE_START), new Coordinate(GlobalVars.convertToPixelX(3, GlobalVars.BASE_WIDTH), GlobalVars.convertToPixelY(PIECE_START, GlobalVars.BASE_HEIGHT)), team, pieceImages[GlobalVars.QUEEN]));
-        pieces.add(new King(isAI,new Coordinate(4,PIECE_START), new Coordinate(GlobalVars.convertToPixelX(4, GlobalVars.BASE_WIDTH), GlobalVars.convertToPixelY(PIECE_START, GlobalVars.BASE_HEIGHT)), team, pieceImages[GlobalVars.KING]));
+        pieces.add(new King(isAI,new Coordinate(4,4), new Coordinate(GlobalVars.convertToPixelX(4, GlobalVars.BASE_WIDTH), GlobalVars.convertToPixelY(PIECE_START, GlobalVars.BASE_HEIGHT)), team, pieceImages[GlobalVars.KING]));
 
 
     }

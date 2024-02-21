@@ -1,18 +1,36 @@
 package engine.pieces;
 
+import engine.ui.Board;
 import engine.ui.Coordinate;
-import engine.ui.Renderer;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Pawn extends Piece implements Movable {
+public class Pawn extends Piece {
     private boolean isFirstMove;
 
     public Pawn(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         super(isAI, position, drawPosition, team, sprite);
         this.isFirstMove = true;
+    }
+
+    /**
+     * @param x
+     * @param y
+     * @return
+     */
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
+        return null;
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+
     }
 
     /**
@@ -28,7 +46,7 @@ public class Pawn extends Piece implements Movable {
      * that the Pawn piece can move to.
      */
     @Override
-    public ArrayList<Coordinate> getMoves() {
+    public ArrayList<Coordinate> getMoves(Board b) {
         return null;
     }
 }

@@ -17,6 +17,8 @@ public class Engine implements Runnable {
     Player playerOne;
     Player playerTwo;
     Board board;
+    private boolean running;
+    private Thread thread;
 
     public Engine() {
         this.renderer = new Renderer();
@@ -41,10 +43,29 @@ public class Engine implements Runnable {
 
     }
 
+    public synchronized void start() {
+        if (running) return;
+
+        running = true;
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    public synchronized void stop() {
+        if (!running) return;
+
+        running = false;
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     @Override
     public void run(){
         int playerTurn = TEAM_ONE;
-        while(true){
+        while(running){
             if (playerTurn == TEAM_ONE){
                 if (playerOne.isAI()) {
                     playerOne.generateMove();
@@ -63,10 +84,4 @@ public class Engine implements Runnable {
 
         }
     }
-
-    private boolean getGameStatus() {
-        //System.out.println("getting game status");
-        return true;
-    }
-
 }

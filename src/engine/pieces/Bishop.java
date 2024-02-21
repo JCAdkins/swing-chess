@@ -1,10 +1,9 @@
 package engine.pieces;
 
+import engine.ui.Board;
 import engine.ui.Coordinate;
-import engine.ui.Renderer;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Bishop extends Piece {
@@ -12,6 +11,25 @@ public class Bishop extends Piece {
 
     public Bishop(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         super(isAI, position, drawPosition, team, sprite);
+    }
+
+    /**
+     * @param x
+     * @param y
+     * @return
+     */
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
+        return null;
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+
     }
 
     /**
@@ -27,7 +45,7 @@ public class Bishop extends Piece {
      * that the Bishop piece can move to.
      */
     @Override
-    public ArrayList<Coordinate> getMoves() {
+    public ArrayList<Coordinate> getMoves(Board b) {
         return null;
     }
 }

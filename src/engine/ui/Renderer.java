@@ -10,18 +10,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import static engine.GlobalVars.*;
 
 public class Renderer extends JPanel {
     private final int SIZE = 8;
-    private final int TEAM_SIZE = 12;
+    private final int TEAM_SIZE = 6;
     private Image[] pieceImagesT1 = new BufferedImage[TEAM_SIZE]; // Assuming you have 12 pieces (6 for each color)
     private Image[] pieceImagesT2 = new BufferedImage[TEAM_SIZE];
     private final ImageIcon boardImage;
     private final ArrayList<Piece> pieces = new ArrayList<>();
     Piece movingPiece;
     Coordinate previousPosition;
+    Board b;
 
     public Renderer() {
         // Load chessboard image
@@ -64,16 +64,19 @@ public class Renderer extends JPanel {
                 if (movingPiece != null && e.getX() > 0 && e.getX() < 512 && e.getY() > 0 && e.getY() < 512) {
                     int col = convertToColumn(e.getX());
                     int row = convertToRow(e.getY());
-                    movingPiece.setPosition(new Coordinate(col, row));
-                    movingPiece.setDrawPosition(new Coordinate(convertToPixelX(col, 512), convertToPixelY(row, 512)));
+                    Coordinate coordinate = new Coordinate(col, row);
+                    System.out.println("isLegalMove: " + isLegalMove(movingPiece, coordinate));
+                    if (isLegalMove(movingPiece, coordinate)) {
+                        movingPiece.setPosition(coordinate);
+                        movingPiece.setDrawPosition(new Coordinate(convertToPixelX(col, 512), convertToPixelY(row, 512)));
+                    }else {
+                        resetPiece();
+                    }
                     repaint();
                 } else if (movingPiece != null && (e.getX() < 0 || e.getX() > 512 || e.getY() < 0 || e.getY() > 512)) {
                         System.out.println("prevPos: " + previousPosition);
-                        movingPiece.setPosition(previousPosition);
-                        movingPiece.setDrawPosition(new Coordinate(convertToPixelX(previousPosition.getX(), 512), convertToPixelY(previousPosition.getY(), 512)));
+                        resetPiece();
                         repaint();
-                } else {
-                    System.out.println("not repositioning");
                 }
 
 
@@ -83,13 +86,21 @@ public class Renderer extends JPanel {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-
                 if (movingPiece != null && e.getX() > 0 && e.getX() < 512 && e.getY() > 0 && e.getY() < 512) {
                     movingPiece.setDrawPosition(new Coordinate(e.getX() - 32, e.getY() - 32));
                     repaint();
                 }
             }
         });
+    }
+
+    private void resetPiece() {
+        movingPiece.setPosition(previousPosition);
+        movingPiece.setDrawPosition(new Coordinate(convertToPixelX(previousPosition.getX(), 512), convertToPixelY(previousPosition.getY(), 512)));
+    }
+
+    private boolean isLegalMove(Piece movingPiece, Coordinate coordinate) {
+        return movingPiece.getMoves(b).contains(coordinate);
     }
 
     private int convertToRow(int y) {
@@ -100,6 +111,10 @@ public class Renderer extends JPanel {
     private int convertToColumn(int x) {
         int squareSizeX = getWidth() / SIZE;
         return x / squareSizeX;
+    }
+
+    public void setBoard(Board b){
+        this.b = b;
     }
 
     // Method to extract pieces from the source image
@@ -140,10 +155,8 @@ public class Renderer extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         // Draw chessboard image
         g.drawImage(boardImage.getImage(), 0, 0, getWidth(), getHeight(), this);
-
         // Draw pieces
         for (Piece piece : pieces) {
             drawPiece(g, piece);
@@ -151,7 +164,6 @@ public class Renderer extends JPanel {
     }
 
     private void drawPiece(Graphics g, Piece piece) {
-
         g.drawImage(piece.getSprite(), piece.getDrawPosition().getX(), piece.getDrawPosition().getY(), this);
     }
 
@@ -179,6 +191,4 @@ public class Renderer extends JPanel {
         List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().equals(coordinate)).toList();
         return pieces1.isEmpty() ? new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1)) : pieces1.getFirst();
     }
-
 }
-

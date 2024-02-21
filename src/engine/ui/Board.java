@@ -10,6 +10,7 @@ public class Board {
     public Board(ArrayList<Piece> pieces, Renderer renderer) {
         this.pieces = pieces;
         renderer.setPieces(pieces);
+        renderer.setBoard(this);
     }
 
     public boolean checkGameStatus() {

@@ -1,5 +1,6 @@
 package engine.pieces;
 
+import engine.ui.Board;
 import engine.ui.Coordinate;
 
 import java.awt.*;
@@ -9,6 +10,25 @@ public class Rook extends Piece {
 
     public Rook(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         super(isAI, position, drawPosition, team, sprite);
+    }
+
+    /**
+     * @param x
+     * @param y
+     * @return
+     */
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
+        return null;
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+
     }
 
     /**
@@ -24,7 +44,7 @@ public class Rook extends Piece {
      * that the Rook piece can move to.
      */
     @Override
-    public ArrayList<Coordinate> getMoves() {
+    public ArrayList<Coordinate> getMoves(Board b) {
         return null;
     }
 }

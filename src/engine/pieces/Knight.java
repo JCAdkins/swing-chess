@@ -1,16 +1,34 @@
 package engine.pieces;
 
+import engine.ui.Board;
 import engine.ui.Coordinate;
-import engine.ui.Renderer;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-public class Knight extends Piece implements Movable {
+public class Knight extends Piece {
 
     public Knight(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         super(isAI,  position, drawPosition, team, sprite);
+    }
+
+    /**
+     * @param x
+     * @param y
+     * @return
+     */
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
+        return null;
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+
     }
 
     /**
@@ -23,10 +41,10 @@ public class Knight extends Piece implements Movable {
 
     /**
      * @return Returns a list of Coordinates that are legal board positions
-     * that the Knight piece can move to.
+     *  piece can move to.
      */
     @Override
-    public ArrayList<Coordinate> getMoves() {
+    public ArrayList<Coordinate> getMoves(Board b) {
         return null;
     }
 }

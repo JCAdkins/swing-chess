@@ -1,7 +1,9 @@
 package engine.pieces;
 
+import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
+import java.util.ArrayList;
 
 public abstract class Piece implements Movable {
     private final boolean isAI;
@@ -55,5 +57,8 @@ public abstract class Piece implements Movable {
     public Image getSprite() {
         return sprite;
     }
+
+    abstract ArrayList<Coordinate> addAllPossibleMoves(int x, int y);
+    abstract void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b);
 }
 
