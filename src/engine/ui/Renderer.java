@@ -10,12 +10,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import static engine.GlobalVars.*;
+import static engine.helpers.GlobalHelper.*;
 
 public class Renderer extends JPanel {
-    private final int SIZE = 8;
-    private final int TEAM_SIZE = 6;
-    private Image[] pieceImagesT1 = new BufferedImage[TEAM_SIZE]; // Assuming you have 12 pieces (6 for each color)
+    private Image[] pieceImagesT1 = new BufferedImage[TEAM_SIZE];
     private Image[] pieceImagesT2 = new BufferedImage[TEAM_SIZE];
     private final ImageIcon boardImage;
     private final ArrayList<Piece> pieces = new ArrayList<>();
@@ -27,14 +25,13 @@ public class Renderer extends JPanel {
         // Load chessboard image
         boardImage = new ImageIcon("sbs_-_2d_chess_pack/Top Down/Boards/Tops/Top - Marble 2 TD 512x520.png");
         // Extract pieces from the source image
-        pieceImagesT1 = extractPieces(1);
-        pieceImagesT2 = extractPieces(2);
+        pieceImagesT1 = extractPieces(TEAM_ONE);
+        pieceImagesT2 = extractPieces(TEAM_TWO);
         // Add a component listener to handle resizing
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 super.componentResized(e);
-                updatePiecePositions();
                 repaint();
             }
         });
@@ -47,7 +44,6 @@ public class Renderer extends JPanel {
              */
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println("x: " + e.getX() + "\ny: " + e.getY());
                 Coordinate coordinate = new Coordinate(convertToColumn(e.getX()), convertToRow(e.getY()));
                 movingPiece = getPieceToMove(coordinate);
                 previousPosition = movingPiece.getPosition();
@@ -60,12 +56,10 @@ public class Renderer extends JPanel {
              */
             @Override
             public void mouseReleased(MouseEvent e) {
-                System.out.println(movingPiece);
                 if (movingPiece != null && e.getX() > 0 && e.getX() < 512 && e.getY() > 0 && e.getY() < 512) {
                     int col = convertToColumn(e.getX());
                     int row = convertToRow(e.getY());
                     Coordinate coordinate = new Coordinate(col, row);
-                    System.out.println("isLegalMove: " + isLegalMove(movingPiece, coordinate));
                     if (isLegalMove(movingPiece, coordinate)) {
                         movingPiece.setPosition(coordinate);
                         movingPiece.setDrawPosition(new Coordinate(convertToPixelX(col, 512), convertToPixelY(row, 512)));
@@ -74,7 +68,6 @@ public class Renderer extends JPanel {
                     }
                     repaint();
                 } else if (movingPiece != null && (e.getX() < 0 || e.getX() > 512 || e.getY() < 0 || e.getY() > 512)) {
-                        System.out.println("prevPos: " + previousPosition);
                         resetPiece();
                         repaint();
                 }
@@ -104,12 +97,12 @@ public class Renderer extends JPanel {
     }
 
     private int convertToRow(int y) {
-        int squareSizeY = getHeight() / SIZE;
+        int squareSizeY = getHeight() / COLUMNS;
         return  (y / squareSizeY);
     }
 
     private int convertToColumn(int x) {
-        int squareSizeX = getWidth() / SIZE;
+        int squareSizeX = getWidth() / ROWS;
         return x / squareSizeX;
     }
 
@@ -118,14 +111,15 @@ public class Renderer extends JPanel {
     }
 
     // Method to extract pieces from the source image
-    private Image[] extractPieces(int i) {
-        String filePath = i == 1 ? "sbs_-_2d_chess_pack/Top Down/Pieces/Black/Black - Rust 1 128x128.png" : "sbs_-_2d_chess_pack/Top Down/Pieces/White/White - Rust 1 128x128.png";
+    private Image[] extractPieces(int team) {
+        String teamOneFilePath = "sbs_-_2d_chess_pack/Top Down/Pieces/Black/Black - Rust 1 128x128.png";
+        String teamTwoFilePath = "sbs_-_2d_chess_pack/Top Down/Pieces/White/White - Rust 1 128x128.png";
+        String filePath = (team == TEAM_ONE) ? teamOneFilePath : teamTwoFilePath;
         try {
             // Load the source image
             BufferedImage sourceImage = ImageIO.read(new File(filePath));
             int backgroundColor = sourceImage.getRGB(0, 0); // Get the background color (assumed at top-left corner)
             BufferedImage imageWithoutBackground = ImageUtils.removeBackground(sourceImage, backgroundColor);
-
             // Extract individual pieces using PieceExtractor class
             PieceExtractor extractor = new PieceExtractor();
             BufferedImage[] sprites = extractor.extractPieces(imageWithoutBackground);
@@ -148,7 +142,7 @@ public class Renderer extends JPanel {
     }
 
     public Image[] getPieceImages(int team) {
-        return team == 1 ? pieceImagesT1 : pieceImagesT2;
+        return (team == 1) ? pieceImagesT1 : pieceImagesT2;
     }
 
     // Override the paintComponent method to draw the chessboard and pieces
@@ -174,13 +168,6 @@ public class Renderer extends JPanel {
         } else {
             return super.getPreferredSize();
         }
-    }
-
-    // Method to update piece positions relative to the new board size
-    private void updatePiecePositions() {
-        // Calculate new piece positions based on the resized board
-        // Update piecePositions array accordingly
-        System.out.println("updating piece positions");
     }
 
     public void setPieces(ArrayList<Piece> list) {

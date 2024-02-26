@@ -2,10 +2,8 @@ package engine.pieces;
 
 import engine.ui.Board;
 import engine.ui.Coordinate;
-
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
 
 public class King extends Piece {
@@ -24,23 +22,8 @@ public class King extends Piece {
 
     }
 
-    /**
-     * @return Returns a list of Coordinates that are legal board positions
-     * that the King piece can move to.
-     */
     @Override
-    public ArrayList<Coordinate> getMoves(Board b) {
-        int x = position.getX();
-        int y = position.getY();
-        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(x, y);
-        System.out.println("possibleMoves before: " + possibleMoves);
-        removeIllegalMoves(possibleMoves, b);
-        System.out.println("possibleMoves after: " + possibleMoves);
-        return possibleMoves;
-    }
-
-    @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
         moves.add(new Coordinate(x-1, y-1));
         moves.add(new Coordinate(x, y-1));
@@ -57,27 +40,34 @@ public class King extends Piece {
     private void addCastles(ArrayList<Coordinate> moves) {
     }
 
+    /**
+     * @param possibleMoves - A list containing all possible legal and illegal moves a piece could make
+     * @param b - The chessboard object the game is being played on
+     */
     @Override
-    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-        removeMovesToTeamPieces(possibleMoves, b);
-        removeMovesOffBoard(possibleMoves, b);
-    }
-
-    private void removeMovesOffBoard(ArrayList<Coordinate> possibleMoves, Board b) {
-        List<Coordinate> illegalMoves = possibleMoves.stream().filter(move -> move.getX() < 0 || move.getY() < 0 || move.getX() > 7 || move.getY() > 7).toList();
-        illegalMoves.forEach(possibleMoves::remove);
-    }
-
-    private void removeMovesToTeamPieces(ArrayList<Coordinate> possibleMoves, Board b) {
-        Iterator<Coordinate> iterator = possibleMoves.iterator();
-        while (iterator.hasNext()) {
-            Coordinate move = iterator.next();
+    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
+        // Remove moves from possibleMoves where the king will be in the other teams possible moves
+        // which would put himself in check
+            Set<Coordinate> otherTeamMoves = new HashSet<>();
             for (Piece piece : b.getPieces()) {
-                if (move.equals(piece.getPosition()) && this.getTeam() == piece.getTeam()) {
-                    iterator.remove();
-                    break; // Break after removing, not before
+                // Don't check moving teams pieces
+                if (piece.getTeam() == this.getTeam())
+                    continue;
+
+                otherTeamMoves.addAll(piece.getMoves(b));
                 }
+
+            for (Coordinate mov : otherTeamMoves){
+                possibleMoves.remove(mov);
             }
-        }
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+
     }
 }

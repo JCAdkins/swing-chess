@@ -2,9 +2,11 @@ package engine.pieces;
 
 import engine.ui.Board;
 import engine.ui.Coordinate;
-
 import java.awt.*;
 import java.util.ArrayList;
+
+import static engine.helpers.MovesHelper.addDiagonalMoves;
+import static engine.helpers.MovesHelper.addHorizontalAndVerticalMoves;
 
 public class Rook extends Piece {
 
@@ -18,8 +20,10 @@ public class Rook extends Piece {
      * @return
      */
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
-        return null;
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
+        ArrayList<Coordinate> moves = new ArrayList<>();
+        addHorizontalAndVerticalMoves(moves, x, y, b);
+        return moves;
     }
 
     /**
@@ -32,19 +36,28 @@ public class Rook extends Piece {
     }
 
     /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
+
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+
+    }
+
+    /**
      *
      */
     @Override
     public void move() {
 
-    }
-
-    /**
-     * @return Returns a list of Coordinates that are legal board positions
-     * that the Rook piece can move to.
-     */
-    @Override
-    public ArrayList<Coordinate> getMoves(Board b) {
-        return null;
     }
 }

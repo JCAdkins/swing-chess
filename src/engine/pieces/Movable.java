@@ -7,5 +7,4 @@ import java.util.ArrayList;
 
 public interface Movable {
     public void move();
-    public ArrayList<Coordinate> getMoves(Board b);
 }

@@ -1,6 +1,5 @@
 package engine.ui;
 
-
 import engine.pieces.Piece;
 import java.util.ArrayList;
 

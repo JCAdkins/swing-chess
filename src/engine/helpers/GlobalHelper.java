@@ -1,9 +1,12 @@
-package engine;
+package engine.helpers;
 
 import engine.ui.Coordinate;
 
-public class GlobalVars
+public class GlobalHelper
 {
+    public static final int TEAM_ONE = 1;
+    public static final int TEAM_TWO = -1;
+    public static final int TEAM_SIZE = 6;
     public static final int BASE_WIDTH = 512;
     public static final int BASE_HEIGHT = 512;
     public static final int ROWS = 8;

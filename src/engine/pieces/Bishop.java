@@ -2,9 +2,10 @@ package engine.pieces;
 
 import engine.ui.Board;
 import engine.ui.Coordinate;
-
 import java.awt.*;
 import java.util.ArrayList;
+
+import static engine.helpers.MovesHelper.addDiagonalMoves;
 
 public class Bishop extends Piece {
 
@@ -14,13 +15,15 @@ public class Bishop extends Piece {
     }
 
     /**
-     * @param x
-     * @param y
-     * @return
+     * @param x - x coordinate of piece
+     * @param y- y coordinate of piece
+     * @return - returns a list of all possible legal and illegal moves the piece can make
      */
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y) {
-        return null;
+    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
+        ArrayList<Coordinate> moves = new ArrayList<>();
+        addDiagonalMoves(moves, x, y, b);
+        return moves;
     }
 
     /**
@@ -28,7 +31,16 @@ public class Bishop extends Piece {
      * @param b
      */
     @Override
-    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
+    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
+
+    }
+
+    /**
+     * @param possibleMoves
+     * @param b
+     */
+    @Override
+    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
 
     }
 
@@ -38,14 +50,5 @@ public class Bishop extends Piece {
     @Override
     public void move() {
 
-    }
-
-    /**
-     * @return Returns a list of Coordinates that are legal board positions
-     * that the Bishop piece can move to.
-     */
-    @Override
-    public ArrayList<Coordinate> getMoves(Board b) {
-        return null;
     }
 }
