@@ -6,6 +6,8 @@ import engine.helpers.GlobalHelper;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static engine.helpers.GlobalHelper.TEAM_ONE;
+
 public abstract class Player {
 
     private ArrayList<Piece> pieces;
@@ -19,10 +21,10 @@ public abstract class Player {
         this.inCheck = false;
         this.isAI = isAI;
         for(int i = 0; i < 8; i++){
-            int PAWN_START = team == 1 ? 1 : 6;
+            int PAWN_START = team == TEAM_ONE ? 1 : 6;
             pieces.add(new Pawn(isAI, new Coordinate(i, PAWN_START), new Coordinate(GlobalHelper.convertToPixelX(i, GlobalHelper.BASE_WIDTH), GlobalHelper.convertToPixelY(PAWN_START, GlobalHelper.BASE_HEIGHT)), team, pieceImages[GlobalHelper.PAWN]));
         }
-        int PIECE_START = team == 1 ? 0 : 7;
+        int PIECE_START = team == TEAM_ONE ? 0 : 7;
         pieces.add(new Rook(isAI, new Coordinate(0, PIECE_START), new Coordinate(GlobalHelper.convertToPixelX(0, GlobalHelper.BASE_WIDTH), GlobalHelper.convertToPixelY(PIECE_START, GlobalHelper.BASE_HEIGHT)), team, pieceImages[GlobalHelper.ROOK]));
         pieces.add(new Rook(isAI,new Coordinate(7,PIECE_START), new Coordinate(GlobalHelper.convertToPixelX(7, GlobalHelper.BASE_WIDTH), GlobalHelper.convertToPixelY(PIECE_START, GlobalHelper.BASE_HEIGHT)), team, pieceImages[GlobalHelper.ROOK]));
         pieces.add(new Knight(isAI,new Coordinate(1,PIECE_START), new Coordinate(GlobalHelper.convertToPixelX(1, GlobalHelper.BASE_WIDTH), GlobalHelper.convertToPixelY(PIECE_START, GlobalHelper.BASE_HEIGHT)), team, pieceImages[GlobalHelper.P1_KNIGHT]));

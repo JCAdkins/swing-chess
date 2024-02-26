@@ -8,18 +8,21 @@ import engine.ui.Board;
 import engine.ui.Renderer;
 import javax.swing.*;
 import java.util.ArrayList;
+import static engine.helpers.GlobalHelper.TEAM_ONE;
+import static engine.helpers.GlobalHelper.TEAM_TWO;
 
 public class Engine implements Runnable {
-    private static final int TEAM_ONE = 1;
-    private static final int TEAM_TWO = -1;
     JFrame frame;
     Renderer renderer;
     Player playerOne;
     Player playerTwo;
     Board board;
     private boolean running;
+    private int playerTurn;
     private Thread thread;
 
+    // Generic bootstrap code to initialize a swing project.
+    // Renderer is where all graphics handling occurs.
     public Engine() {
         this.renderer = new Renderer();
         this.frame = new JFrame("Chessboard");
@@ -30,9 +33,11 @@ public class Engine implements Runnable {
         frame.setVisible(true);
     }
 
+    // Initialize all game components
     public void initialize() {
-        playerOne = new Human(1, renderer.getPieceImages(1), false);
-        playerTwo = new AI(2, renderer.getPieceImages(2), true);
+        playerOne = new Human(TEAM_ONE, renderer.getPieceImages(1), false);
+        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2), true);
+        playerTurn = TEAM_ONE;
 
         //========================================================================
         ArrayList<Piece> gamePieces = new ArrayList<>(playerOne.getPieces());
@@ -43,6 +48,7 @@ public class Engine implements Runnable {
 
     }
 
+    // When start is called on a thread it auto-invokes a Runnable's run() method.
     public synchronized void start() {
         if (running) return;
 
@@ -51,6 +57,7 @@ public class Engine implements Runnable {
         thread.start();
     }
 
+    // Call to pause engine execution
     public synchronized void stop() {
         if (!running) return;
 
@@ -64,7 +71,6 @@ public class Engine implements Runnable {
 
     @Override
     public void run(){
-        int playerTurn = TEAM_ONE;
         while(running){
             if (playerTurn == TEAM_ONE){
                 if (playerOne.isAI()) {
