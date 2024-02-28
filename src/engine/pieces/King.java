@@ -6,13 +6,14 @@ import java.awt.*;
 import java.util.*;
 
 public class King extends Piece {
-    private boolean canCastle;
+    private boolean canCastle, isInCheck;
     Rook rookOne;
     Rook rookTwo;
 
     public King(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite, Rook rookOne, Rook rookTwo) {
         super(isAI, position, drawPosition, team, sprite);
         this.canCastle = true;
+        this.isInCheck = false;
         this.rookOne = rookOne;
         this.rookTwo = rookTwo;
     }
@@ -50,5 +51,13 @@ public class King extends Piece {
             moves.add(rookOne.getPosition());
         if (canCastle && rookTwo.canCastle())
             moves.add(rookTwo.getPosition());
+    }
+
+    public void setIsInCheck(Boolean value){
+        this.isInCheck = value;
+    }
+
+    public boolean getIsInCheck(){
+        return isInCheck;
     }
 }

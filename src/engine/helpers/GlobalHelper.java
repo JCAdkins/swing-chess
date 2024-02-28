@@ -61,6 +61,6 @@ public class GlobalHelper
         int squareHeight = boardHeight / ROWS;
 
         // Return the pixel coordinates as a Coordinate object
-        return y * squareHeight;
+        return (7 - y) * squareHeight;
     }
 }

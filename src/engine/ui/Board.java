@@ -3,6 +3,7 @@ package engine.ui;
 import engine.pieces.Piece;
 import engine.player.Player;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import static engine.helpers.GlobalHelper.*;
 
@@ -20,19 +21,17 @@ public class Board {
     }
 
     public int checkGameStatus() {
-        if (playerInCheckmate() == TEAM_ONE || playerInCheckmate() == TEAM_TWO)
-            return playerInCheckmate();
-        if (playerCannotMove())
+        if (playerOne.getIsCheckMate())
+            return TEAM_ONE;
+        if (playerTwo.getIsCheckMate())
+            return TEAM_TWO;
+        if (!playersCanMove())
             return DRAW;
         return CONTINUE_GAME;
     }
 
-    private boolean playerCannotMove() {
-        return false;
-    }
-
-    private int playerInCheckmate() {
-        return CONTINUE_GAME;
+    private boolean playersCanMove() {
+        return playerOne.canMove() || playerTwo.canMove();
     }
 
     public void addPiece(Piece newPiece){
@@ -50,5 +49,23 @@ public class Board {
 
     public ArrayList<Piece> getPieces() {
             return pieces;
+    }
+    public ArrayList<Piece> getT1Pieces() {
+        ArrayList<Piece> list = new ArrayList<>();
+        for (Piece piece : pieces) {
+            if (piece.getTeam() == playerOne.getTeam()) {
+                list.add(piece);
+            }
+        }
+        return list;
+    }
+    public ArrayList<Piece> getT2Pieces() {
+        ArrayList<Piece> list = new ArrayList<>();
+        for (Piece piece : pieces) {
+            if (piece.getTeam() == playerTwo.getTeam()) {
+                list.add(piece);
+            }
+        }
+        return list;
     }
 }

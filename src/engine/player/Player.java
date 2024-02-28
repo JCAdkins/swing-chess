@@ -1,6 +1,7 @@
 package engine.player;
 
 import engine.pieces.*;
+import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
@@ -11,13 +12,15 @@ public abstract class Player {
     private ArrayList<Piece> pieces;
     private final int team;
     private final boolean isAI;
-    private boolean inCheck;
+    private boolean inCheck, canMove, isCheckMate;
 
     public Player(int team, Image[] pieceImages, boolean isAI) {
         this.pieces = new ArrayList<>();
         this.team = team;
         this.isAI = isAI;
         this.inCheck = false;
+        this.canMove = true;
+        this.isCheckMate = false;
         for(int i = 0; i < 8; i++){
             int PAWN_START = team == TEAM_ONE ? 1 : 6;
             pieces.add(new Pawn(isAI, new Coordinate(i, PAWN_START),  convertToPixelCoordinate(i, PAWN_START), team, pieceImages[PAWN]));
@@ -72,5 +75,32 @@ public abstract class Player {
         return isAI;
     }
 
-    public abstract void generateMove();
+    public abstract ArrayList<Coordinate> generateMove(ArrayList<Piece> pieces, Board b);
+
+    public boolean canMove() {
+        return canMove;
+    }
+
+    public void setCanMove(boolean canMove) {
+        this.canMove = canMove;
+    }
+
+    public void setIsCheckMate(boolean isCheckMate){
+        this.isCheckMate = isCheckMate;
+    }
+
+    public boolean getIsCheckMate(){
+        return isCheckMate;
+    }
+
+    public void runChecks(Board b) {
+        inCheck = ((King) pieces.getLast()).getIsInCheck(); // This is going to break when pieces get added to team's pieces list
+        for (Piece piece : pieces){
+            if (!piece.getMoves(b).isEmpty()) {
+                canMove = true;
+                break;
+            }
+                canMove = false;
+        }
+    }
 }

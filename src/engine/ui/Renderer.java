@@ -1,5 +1,6 @@
 package engine.ui;
 
+import engine.Engine;
 import engine.pieces.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -9,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import static engine.helpers.GlobalHelper.*;
 
@@ -19,11 +19,13 @@ public class Renderer extends JPanel {
     private final ImageIcon boardImage;
     private final ArrayList<Piece> pieces = new ArrayList<>();
     Piece movingPiece;
+    Engine e;
     Coordinate previousPosition;
     private boolean canPaintMoves;
     Board b;
 
-    public Renderer() {
+    public Renderer(Engine e) {
+        this.e = e;
         this.canPaintMoves = false;
         // Load chessboard image
         boardImage = new ImageIcon("sbs_-_2d_chess_pack/Top Down/Boards/Tops/Top - Marble 2 TD 512x520.png");
@@ -66,10 +68,7 @@ public class Renderer extends JPanel {
                     int row = convertToRow(e.getY());
                     Coordinate coordinate = new Coordinate(col, row);
                     if (isLegalMove(coordinate)) {
-                        removeUniqueEvents(); // This removes castles/pawn double jump if piece is moved
-                        performCastle(coordinate); // Will move other piece involved in castle if castle otherwise will do nothing
-                        removePiece(coordinate); // If a piece is jumped then remove it
-                        movePiece(coordinate, col, row);
+                        performMove(coordinate, col, row);
                     }else {
                         resetPiece();
                     }
@@ -92,8 +91,20 @@ public class Renderer extends JPanel {
         });
     }
 
+    private void performMove(Coordinate coordinate, int col, int row) {
+        removeUniqueEvents(); // This removes castles/pawn double jump if piece is moved
+        performCastle(coordinate); // Will move other piece involved in castle if castle otherwise will do nothing
+        removePiece(coordinate); // If a piece is jumped then remove it
+        movePiece(coordinate, col, row);
+        switchPlayers();
+    }
+
     private boolean isInBoardBounds(MouseEvent e) {
         return movingPiece != null && e.getX() > 0 && e.getX() < BASE_WIDTH && e.getY() > 0 && e.getY() < BASE_HEIGHT;
+    }
+
+    private void switchPlayers(){
+        e.switchPlayers();
     }
 
     private void removePiece(Coordinate coordinate){
@@ -151,7 +162,7 @@ public class Renderer extends JPanel {
     }
 
     private int convertToRow(int y) {
-        return  (y / SQUARE_SIZE);
+        return  7 - (y / SQUARE_SIZE);
     }
 
     private int convertToColumn(int x) {
@@ -199,6 +210,7 @@ public class Renderer extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         // Draw chessboard image
         g.drawImage(boardImage.getImage(), 0, 0, getWidth(), getHeight(), this);
 
@@ -222,8 +234,23 @@ public class Renderer extends JPanel {
             g2d.setStroke(oldStroke);
         }
         // Draw pieces
-        for (Piece piece : pieces) {
+        List<Piece> piecesCopy;
+        synchronized (pieces) {
+            piecesCopy = new ArrayList<>(pieces);
+        }
+        for (Piece piece : piecesCopy) {
             drawPiece(g, piece);
+        }
+    }
+
+    public void performAiMove(ArrayList<Coordinate> move){
+        if (!move.isEmpty()) {
+            Coordinate from = move.getFirst();
+            Coordinate to = move.getLast();
+            movingPiece = getPieceToMove(from);
+            performMove(to, to.getX(), to.getY());
+            repaint();
+            e.switchPlayers();
         }
     }
 
@@ -247,6 +274,11 @@ public class Renderer extends JPanel {
 
     private Piece getPieceToMove(Coordinate coordinate) {
         List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().equals(coordinate)).toList();
-        return pieces1.isEmpty() ? new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1)) : pieces1.getFirst();
+
+        if (pieces1.isEmpty())
+            return new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1));
+        if (pieces1.getFirst().getTeam() != e.getPlayerTurn())
+            return new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1));
+        return pieces1.getFirst();
     }
 }

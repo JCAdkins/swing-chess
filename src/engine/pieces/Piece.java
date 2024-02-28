@@ -12,7 +12,6 @@ import static engine.helpers.GlobalHelper.convertToPixelY;
 
 public abstract class Piece {
     private final boolean isAI;
-    private boolean canMove;
     Coordinate position;
     Coordinate drawPosition;
     private final int team;
@@ -20,7 +19,6 @@ public abstract class Piece {
 
     public Piece(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         this.isAI = isAI;
-        this.canMove = true;
         this.position = position;
         this.drawPosition = drawPosition;
         this.team = team;
@@ -31,13 +29,10 @@ public abstract class Piece {
         return isAI;
     }
 
-    public boolean canMove() {
-        return canMove;
+    public boolean canMove(Board b) {
+        return !getMoves(b).isEmpty();
     }
 
-    public void setCanMove(boolean canMove) {
-        this.canMove = canMove;
-    }
 
     public Coordinate getPosition() {
         return position;

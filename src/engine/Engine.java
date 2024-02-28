@@ -8,6 +8,7 @@ import engine.ui.Board;
 import engine.ui.Renderer;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static engine.helpers.GlobalHelper.*;
 
@@ -18,13 +19,13 @@ public class Engine implements Runnable {
     Player playerTwo;
     Board board;
     private boolean running;
-    private int playerTurn;
+    private volatile AtomicInteger playerTurn;
     private Thread thread;
 
     // Generic bootstrap code to initialize a swing project.
     // Renderer is where all graphics handling occurs.
     public Engine() {
-        this.renderer = new Renderer();
+        this.renderer = new Renderer(this);
         this.frame = new JFrame("Chessboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(renderer);
@@ -37,7 +38,7 @@ public class Engine implements Runnable {
     public void initialize() {
         playerOne = new Human(TEAM_ONE, renderer.getPieceImages(1), false);
         playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2), true);
-        playerTurn = TEAM_ONE;
+        playerTurn = new AtomicInteger(TEAM_ONE);
 
         //========================================================================
         ArrayList<Piece> gamePieces = new ArrayList<>(playerOne.getPieces());
@@ -72,23 +73,25 @@ public class Engine implements Runnable {
     @Override
     public void run(){
         while(running){
-            if (playerTurn == TEAM_ONE){
+            //System.out.println("playerTurn: " + playerTurn);
+            if (playerTurn.get() == TEAM_ONE){
                 if (playerOne.isAI()) {
-                    playerOne.generateMove();
+                    renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
                     renderer.repaint();
-                    playerTurn *= SWITCH_TEAM; // Set turn to player two.
+                   switchPlayers();
+                    runPlayerChecks();
                 }
             }
 
             if (board.checkGameStatus() != CONTINUE_GAME)
                 endGame(board.checkGameStatus());
 
-
-            if (playerTurn == TEAM_TWO) {
+            if (playerTurn.get() == TEAM_TWO) {
                 if (playerTwo.isAI()) {
-                    playerTwo.generateMove();
+                    renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
                     renderer.repaint();
-                    playerTurn *= SWITCH_TEAM; // Set turn to player one.
+                    switchPlayers();
+                    runPlayerChecks();
                 }
             }
 
@@ -97,6 +100,19 @@ public class Engine implements Runnable {
 
 
         }
+    }
+
+    private void runPlayerChecks() {
+        playerOne.runChecks(board);
+        playerTwo.runChecks(board);
+    }
+
+    public void switchPlayers(){
+        playerTurn.set(playerTurn.get() * SWITCH_TEAM);
+    }
+
+    public int getPlayerTurn(){
+        return playerTurn.get();
     }
 
     private void endGame(int i) {
