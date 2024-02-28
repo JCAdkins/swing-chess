@@ -35,24 +35,7 @@ public class Knight extends Piece {
      * @param b
      */
     @Override
-    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void move() {
 
     }
 }

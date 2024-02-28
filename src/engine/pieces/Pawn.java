@@ -13,57 +13,42 @@ public class Pawn extends Piece {
         this.isFirstMove = true;
     }
 
-    /**
-     * @param x
-     * @param y
-     * @return
-     */
+    public void setIsFirstMove(boolean firstMove) {
+        isFirstMove = firstMove;
+    }
+
     @Override
     ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        moves.add(new Coordinate(x-1, y-1));
-        moves.add(new Coordinate(x, y-1));
-        moves.add(new Coordinate(x+1, y-1));
-        moves.add(new Coordinate(x-1, y));
-        moves.add(new Coordinate(x+1, y));
-        moves.add(new Coordinate(x-1, y+1));
-        moves.add(new Coordinate(x, y+1));
-        moves.add(new Coordinate(x+1, y+1));
+        boolean isValid = true, isDoubleValid = true, addTopLeft = false, addTopRight = false;
+        for (Piece piece : b.getPieces()){
+            if (piece.getTeam() == getTeam())
+                continue;
+            if (piece.getPosition().equals(new Coordinate(x, y + getTeam())))
+                isValid = false;
+            if (piece.getPosition().equals(new Coordinate(x, y + 2 * getTeam())))
+                isDoubleValid = false;
+            if (piece.getPosition().equals(new Coordinate(x + 1, y + getTeam())))
+                addTopRight = true;
+            if (piece.getPosition().equals(new Coordinate(x - 1, y + getTeam())))
+                addTopLeft = true;
+
+
+
+        }
+        if (isValid)
+            moves.add(new Coordinate(x, y + getTeam()));
+        if (addTopRight)
+            moves.add(new Coordinate(x + 1, y + getTeam()));
+        if (addTopLeft)
+            moves.add(new Coordinate(x - 1, y + getTeam()));
+        if (isFirstMove && isValid && isDoubleValid)
+            moves.add(new Coordinate(x, y + 2 * getTeam()));
         return moves;
     }
 
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
     @Override
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void move() {
 
     }
 }

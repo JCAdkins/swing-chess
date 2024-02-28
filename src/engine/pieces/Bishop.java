@@ -4,7 +4,6 @@ import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
-
 import static engine.helpers.MovesHelper.addDiagonalMoves;
 
 public class Bishop extends Piece {
@@ -22,7 +21,7 @@ public class Bishop extends Piece {
     @Override
     ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        addDiagonalMoves(moves, x, y, b);
+        addDiagonalMoves(moves, x, y, getTeam(), b);
         return moves;
     }
 
@@ -31,24 +30,7 @@ public class Bishop extends Piece {
      * @param b
      */
     @Override
-    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void move() {
 
     }
 }

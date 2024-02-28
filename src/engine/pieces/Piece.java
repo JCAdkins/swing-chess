@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class Piece implements Movable {
+import static engine.helpers.GlobalHelper.convertToPixelX;
+import static engine.helpers.GlobalHelper.convertToPixelY;
+
+public abstract class Piece {
     private final boolean isAI;
     private boolean canMove;
     Coordinate position;
@@ -28,7 +31,7 @@ public abstract class Piece implements Movable {
         return isAI;
     }
 
-    public boolean isCanMove() {
+    public boolean canMove() {
         return canMove;
     }
 
@@ -42,6 +45,7 @@ public abstract class Piece implements Movable {
 
     public void setPosition(Coordinate position) {
         this.position = position;
+        this.drawPosition = new Coordinate(convertToPixelX(position.getX(), 512), convertToPixelY(position.getY(), 512));
     }
 
     public Coordinate getDrawPosition() {
@@ -64,27 +68,30 @@ public abstract class Piece implements Movable {
         int x = position.getX();
         int y = position.getY();
         ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(x, y, b);
-        System.out.println("position: " + position);
-        System.out.println("possibleMoves before: " + possibleMoves);
         removeIllegalMoves(possibleMoves, b);
-        System.out.println("possibleMoves after: " + possibleMoves);
+        addCastles(possibleMoves, b);
         return possibleMoves;
     }
 
+    public void addCastles(ArrayList<Coordinate> possibleMoves, Board b) {
+        // Nothing
+    }
+
     abstract ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b);
+
+    public boolean moveWillPutPlayerInCheck() {
+        return false;
+    }
+
     void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b){
         removeOffBoardMoves(possibleMoves, b);
         removeAllMovesOnSelf(possibleMoves, b);
-        removeMovesPuttingPlayerInCheck(possibleMoves, b);
         removeAllOtherMoves(possibleMoves, b);
     }
-
     private void removeOffBoardMoves(ArrayList<Coordinate> possibleMoves, Board b) {
         List<Coordinate> illegalMoves = possibleMoves.stream().filter(move -> move.getX() < 0 || move.getY() < 0 || move.getX() > 7 || move.getY() > 7).toList();
         illegalMoves.forEach(possibleMoves::remove);
     }
-
-    abstract void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b);
     private void removeAllMovesOnSelf(ArrayList<Coordinate> possibleMoves, Board b){
         Iterator<Coordinate> iterator = possibleMoves.iterator();
         while (iterator.hasNext()) {
@@ -99,5 +106,6 @@ public abstract class Piece implements Movable {
     }
 
     abstract void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b);
+
 }
 

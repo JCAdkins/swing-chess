@@ -7,66 +7,90 @@ import engine.ui.Coordinate;
 import java.util.ArrayList;
 
 public class MovesHelper {
-    public static void addDiagonalMoves(ArrayList<Coordinate> movesList, int x, int y, Board b){
-        boolean collisionTopRight = false;
-        boolean collisionTopLeft = false;
-        boolean collisionBottomRight = false;
-        boolean collisionBottomLeft = false;
+    public static void addDiagonalMoves(ArrayList<Coordinate> movesList, int x, int y, int team, Board b){
+        Coordinate topLeft = null;
+        Coordinate topRight = null;
+        Coordinate bottomLeft = null;
+        Coordinate bottomRight = null;
 
-        for(int i = 1; i < 7; i++){
-            if (!collisionTopRight)
-                collisionTopRight = checkCollision(x + i, y + i, b);
-            if (!collisionBottomRight)
-                collisionBottomRight = checkCollision(x + i, y - i, b);
-            if (!collisionTopLeft)
-                collisionTopLeft = checkCollision( x - i, y + i, b);
-            if (!collisionBottomLeft)
-                collisionBottomLeft = checkCollision(x - i, y - i, b);
-            if (!collisionTopRight)
+        for(int i = 1; i < 8; i++){
+            if (topRight == null)
+                topRight = checkCollision(x + i, y + i, team, b);
+            if (bottomRight == null)
+                bottomRight = checkCollision(x + i, y - i, team, b);
+            if (topLeft == null)
+                topLeft = checkCollision( x - i, y + i, team, b);
+            if (bottomLeft == null)
+                bottomLeft = checkCollision(x - i, y - i, team, b);
+            if (topRight == null)
                 movesList.add(new Coordinate(x + i, y + i));
-            if (!collisionBottomRight)
+            if (bottomRight == null)
                 movesList.add(new Coordinate(x + i, y - i));
-            if (!collisionTopLeft)
+            if (topLeft == null)
                 movesList.add(new Coordinate(x - i, y + i));
-            if (!collisionBottomLeft)
+            if (bottomLeft == null)
                 movesList.add(new Coordinate(x - i, y - i));
         }
+
+        if (topLeft != null)
+            movesList.add(topLeft);
+        if (bottomLeft != null)
+            movesList.add(bottomLeft);
+        if (topRight != null)
+            movesList.add(topRight);
+        if (bottomRight != null)
+            movesList.add(bottomRight);
     }
 
-    public static void addHorizontalAndVerticalMoves(ArrayList<Coordinate> movesList, int x, int y, Board b){
+    public static void addHorizontalAndVerticalMoves(ArrayList<Coordinate> movesList, int x, int y, int team, Board b){
         boolean collisionTop = false;
         boolean collisionBottom = false;
         boolean collisionRight = false;
         boolean collisionLeft = false;
+        Coordinate top = null;
+        Coordinate bottom = null;
+        Coordinate left = null;
+        Coordinate right = null;
 
-        for(int i = 1; i < 7; i++){
-            if (!collisionTop)
-                collisionTop = checkCollision( x, y + i, b);
-            if (!collisionBottom)
-                collisionBottom = checkCollision( x, y - i, b);
-            if (!collisionLeft)
-                collisionLeft = checkCollision( x - i, y, b);
-            if (!collisionRight)
-                collisionRight = checkCollision( x + i, y, b);
-            if (!collisionTop)
+        for(int i = 1; i < 8; i++){
+            if (top == null)
+                top = checkCollision( x, y + i, team, b);
+            if (bottom == null)
+                bottom = checkCollision( x, y - i, team, b);
+            if (left == null)
+                left = checkCollision( x - i, y, team, b);
+            if (right == null)
+                right = checkCollision( x + i, y, team, b);
+            if (top == null)
                 movesList.add(new Coordinate(x, y + i));
-            if (!collisionBottom)
+            if (bottom == null)
                 movesList.add(new Coordinate(x, y - i));
-            if (!collisionLeft)
+            if (left == null)
                 movesList.add(new Coordinate(x - i, y));
-            if (!collisionRight)
+            if (right == null)
                 movesList.add(new Coordinate(x + i, y));
         }
+        if (top != null)
+            movesList.add(top);
+        if (bottom != null)
+            movesList.add(bottom);
+        if (left != null)
+            movesList.add(left);
+        if (right != null)
+            movesList.add(right);
     }
 
-    private static boolean checkCollision(int x, int y, Board b) {
+    private static Coordinate checkCollision(int x, int y, int team, Board b) {
         Coordinate position = new Coordinate(x, y);
         ArrayList<Piece> boardPieces = b.getPieces();
         for (Piece piece : boardPieces){
             if (piece.getPosition().equals(position)) {
-                return true;
+                if (piece.getTeam() != team)
+                    return position;
+                else
+                    return new Coordinate(-1, -1);
             }
         }
-        return false;
+        return null;
     }
 }

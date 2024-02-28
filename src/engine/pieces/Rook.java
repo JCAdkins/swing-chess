@@ -9,9 +9,12 @@ import static engine.helpers.MovesHelper.addDiagonalMoves;
 import static engine.helpers.MovesHelper.addHorizontalAndVerticalMoves;
 
 public class Rook extends Piece {
+    private boolean canCastle;
+    King king;
 
     public Rook(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         super(isAI, position, drawPosition, team, sprite);
+        this.canCastle = true;
     }
 
     /**
@@ -22,26 +25,8 @@ public class Rook extends Piece {
     @Override
     ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        addHorizontalAndVerticalMoves(moves, x, y, b);
+        addHorizontalAndVerticalMoves(moves, x, y, getTeam(), b);
         return moves;
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeMovesPuttingPlayerInCheck(ArrayList<Coordinate> possibleMoves, Board b) {
-
     }
 
     /**
@@ -53,11 +38,21 @@ public class Rook extends Piece {
 
     }
 
-    /**
-     *
-     */
-    @Override
-    public void move() {
+    public void addKing(King king){
+        this.king = king;
+    }
 
+    public boolean canCastle(){
+        return canCastle;
+    }
+
+    @Override
+    public void addCastles(ArrayList<Coordinate> moves, Board b){
+        if (canCastle && king.canCastle())
+            moves.add(king.getPosition());
+    }
+
+    public void setCanCastle(boolean bool){
+        this.canCastle = bool;
     }
 }

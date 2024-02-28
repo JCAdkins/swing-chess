@@ -8,8 +8,8 @@ import engine.ui.Board;
 import engine.ui.Renderer;
 import javax.swing.*;
 import java.util.ArrayList;
-import static engine.helpers.GlobalHelper.TEAM_ONE;
-import static engine.helpers.GlobalHelper.TEAM_TWO;
+
+import static engine.helpers.GlobalHelper.*;
 
 public class Engine implements Runnable {
     JFrame frame;
@@ -44,7 +44,7 @@ public class Engine implements Runnable {
         gamePieces.addAll(playerTwo.getPieces());
         //========================================================================
 
-        board = new Board(gamePieces, renderer);
+        board = new Board(gamePieces, renderer, playerOne, playerTwo);
 
     }
 
@@ -76,18 +76,30 @@ public class Engine implements Runnable {
                 if (playerOne.isAI()) {
                     playerOne.generateMove();
                     renderer.repaint();
-                    playerTurn *= -1; // Set turn to player two.
+                    playerTurn *= SWITCH_TEAM; // Set turn to player two.
                 }
-
             }
+
+            if (board.checkGameStatus() != CONTINUE_GAME)
+                endGame(board.checkGameStatus());
+
+
             if (playerTurn == TEAM_TWO) {
                 if (playerTwo.isAI()) {
                     playerTwo.generateMove();
                     renderer.repaint();
-                    playerTurn *= -1; // Set turn to player one.
+                    playerTurn *= SWITCH_TEAM; // Set turn to player one.
                 }
             }
 
+            if (board.checkGameStatus() != CONTINUE_GAME)
+                endGame(board.checkGameStatus());
+
+
         }
+    }
+
+    private void endGame(int i) {
+        System.out.println("Game over!\nCode: " + i);
     }
 }
