@@ -114,7 +114,6 @@ public abstract class Player {
         ArrayList<Piece> opposingPieces = otherPlayer.getPieces();
         for (Piece piece : opposingPieces){
             ArrayList<Coordinate> pieceMoves = piece.getMoves(b);
-            System.out.println(piece);
             for (Coordinate move : pieceMoves){
                 if (king.getPosition().equals(move))
                     return true;
