@@ -38,4 +38,9 @@ public class Knight extends Piece {
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
 
     }
+
+    @Override
+    public String toString(){
+        return "Knight " + getTeam() + ": " + getPosition();
+    }
 }

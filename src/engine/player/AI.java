@@ -26,7 +26,6 @@ public class AI extends Player{
         int size = pieces1.size();
         Random r = new Random();
         Piece pieceToGetMoveFrom = pieces1.get(r.nextInt(size));
-        System.out.println(pieceToGetMoveFrom);
 
         size = pieceToGetMoveFrom.getMoves(b).size();
         Coordinate from = pieceToGetMoveFrom.getPosition();

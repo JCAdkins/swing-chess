@@ -78,6 +78,7 @@ public abstract class Piece {
         return false;
     }
 
+
     void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b){
         removeOffBoardMoves(possibleMoves, b);
         removeAllMovesOnSelf(possibleMoves, b);

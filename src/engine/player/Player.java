@@ -10,6 +10,7 @@ import static engine.helpers.GlobalHelper.*;
 public abstract class Player {
 
     private ArrayList<Piece> pieces;
+    private final King king;
     private final int team;
     private final boolean isAI;
     private boolean inCheck, canMove, isCheckMate;
@@ -28,9 +29,9 @@ public abstract class Player {
         int PIECE_START = team == TEAM_ONE ? 0 : 7;
         Rook rookOne = new Rook(isAI, new Coordinate(ROOK_ONE_START, PIECE_START), convertToPixelCoordinate(ROOK_ONE_START, PIECE_START), team, pieceImages[ROOK]);
         Rook rookTwo = new Rook(isAI,new Coordinate(ROOK_TWO_START,PIECE_START),  convertToPixelCoordinate(ROOK_TWO_START, PIECE_START), team, pieceImages[ROOK]);
-        King king = new King(isAI,new Coordinate(KING_START,PIECE_START),  convertToPixelCoordinate(KING_START, PIECE_START), team, pieceImages[KING], rookOne, rookTwo);
-        rookOne.addKing(king);
-        rookTwo.addKing(king);
+        this.king = new King(isAI,new Coordinate(KING_START,PIECE_START),  convertToPixelCoordinate(KING_START, PIECE_START), team, pieceImages[KING], rookOne, rookTwo);
+        rookOne.addKing(this.king);
+        rookTwo.addKing(this.king);
         pieces.add(rookOne);
         pieces.add(rookTwo);
         pieces.add(new Knight(isAI,new Coordinate(KNIGHT_ONE_START,PIECE_START), convertToPixelCoordinate(KNIGHT_ONE_START, PIECE_START), team, pieceImages[KNIGHT]));
@@ -38,7 +39,7 @@ public abstract class Player {
         pieces.add(new Bishop(isAI,new Coordinate(BISHOP_ONE_START,PIECE_START),  convertToPixelCoordinate(BISHOP_ONE_START, PIECE_START), team, pieceImages[BISHOP]));
         pieces.add(new Bishop(isAI,new Coordinate(BISHOP_TWO_START, PIECE_START),  convertToPixelCoordinate(BISHOP_TWO_START, PIECE_START), team, pieceImages[BISHOP]));
         pieces.add(new Queen(isAI,new Coordinate(QUEEN_START,PIECE_START),  convertToPixelCoordinate(QUEEN_START, PIECE_START), team, pieceImages[QUEEN]));
-        pieces.add(king);
+        pieces.add(this.king);
 
 
     }
@@ -71,6 +72,10 @@ public abstract class Player {
         this.pieces.remove(pieceToRemove);
     }
 
+    public King getKing(){
+        return this.king;
+    }
+
     public boolean isAI() {
         return isAI;
     }
@@ -94,7 +99,7 @@ public abstract class Player {
     }
 
     public void runChecks(Board b) {
-        inCheck = ((King) pieces.getLast()).getIsInCheck(); // This is going to break when pieces get added to team's pieces list
+        inCheck = isKingChecked(b);
         for (Piece piece : pieces){
             if (!piece.getMoves(b).isEmpty()) {
                 canMove = true;
@@ -102,5 +107,19 @@ public abstract class Player {
             }
                 canMove = false;
         }
+    }
+
+    private boolean isKingChecked(Board b) {
+        Player otherPlayer = b.getOtherPlayer(team);
+        ArrayList<Piece> opposingPieces = otherPlayer.getPieces();
+        for (Piece piece : opposingPieces){
+            ArrayList<Coordinate> pieceMoves = piece.getMoves(b);
+            System.out.println(piece);
+            for (Coordinate move : pieceMoves){
+                if (king.getPosition().equals(move))
+                    return true;
+            }
+        }
+        return false;
     }
 }

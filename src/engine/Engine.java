@@ -73,12 +73,11 @@ public class Engine implements Runnable {
     @Override
     public void run(){
         while(running){
-            //System.out.println("playerTurn: " + playerTurn);
             if (playerTurn.get() == TEAM_ONE){
                 if (playerOne.isAI()) {
                     renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
                     renderer.repaint();
-                   switchPlayers();
+                    switchPlayers();
                     runPlayerChecks();
                 }
             }
@@ -102,7 +101,7 @@ public class Engine implements Runnable {
         }
     }
 
-    private void runPlayerChecks() {
+    public void runPlayerChecks() {
         playerOne.runChecks(board);
         playerTwo.runChecks(board);
     }
@@ -116,6 +115,6 @@ public class Engine implements Runnable {
     }
 
     private void endGame(int i) {
-        System.out.println("Game over!\nCode: " + i);
+//        System.out.println("Game over!\nCode: " + i);
     }
 }

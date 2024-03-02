@@ -55,4 +55,10 @@ public class Rook extends Piece {
     public void setCanCastle(boolean bool){
         this.canCastle = bool;
     }
+
+    @Override
+    public String toString(){
+        return "Rook " + getTeam() + ": " + getPosition();
+    }
 }
+

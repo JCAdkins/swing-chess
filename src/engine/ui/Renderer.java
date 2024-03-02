@@ -2,6 +2,8 @@ package engine.ui;
 
 import engine.Engine;
 import engine.pieces.*;
+import engine.player.Player;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -50,7 +52,7 @@ public class Renderer extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 Coordinate coordinate = new Coordinate(convertToColumn(e.getX()), convertToRow(e.getY()));
-                movingPiece = getPieceToMove(coordinate);
+                movingPiece = getPiece(coordinate);
                 previousPosition = movingPiece.getPosition();
                 canPaintMoves = true;
                 repaint();
@@ -69,6 +71,7 @@ public class Renderer extends JPanel {
                     Coordinate coordinate = new Coordinate(col, row);
                     if (isLegalMove(coordinate)) {
                         performMove(coordinate, col, row);
+                        checkAndSetCheck();
                     }else {
                         resetPiece();
                     }
@@ -83,8 +86,8 @@ public class Renderer extends JPanel {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (movingPiece != null && e.getX() > 0 && e.getX() < 512 && e.getY() > 0 && e.getY() < 512) {
-                    movingPiece.setDrawPosition(new Coordinate(e.getX() - 32, e.getY() - 32));
+                if (movingPiece != null && isInBoardBounds(e)) {
+                    movingPiece.setDrawPosition(new Coordinate(e.getX() - SQUARE_SIZE / 2, e.getY() - SQUARE_SIZE / 2));
                     repaint();
                 }
             }
@@ -105,6 +108,10 @@ public class Renderer extends JPanel {
 
     private void switchPlayers(){
         e.switchPlayers();
+    }
+
+    private void checkAndSetCheck(){
+        e.runPlayerChecks();
     }
 
     private void removePiece(Coordinate coordinate){
@@ -179,11 +186,9 @@ public class Renderer extends JPanel {
         String teamTwoFilePath = "sbs_-_2d_chess_pack/Top Down/Pieces/White/White - Rust 1 128x128.png";
         String filePath = (team == TEAM_ONE) ? teamOneFilePath : teamTwoFilePath;
         try {
-            // Load the source image
             BufferedImage sourceImage = ImageIO.read(new File(filePath));
             int backgroundColor = sourceImage.getRGB(0, 0); // Get the background color (assumed at top-left corner)
             BufferedImage imageWithoutBackground = ImageUtils.removeBackground(sourceImage, backgroundColor);
-            // Extract individual pieces using PieceExtractor class
             PieceExtractor extractor = new PieceExtractor();
             BufferedImage[] sprites = extractor.extractPieces(imageWithoutBackground);
             return scaleSprites(sprites);
@@ -214,6 +219,8 @@ public class Renderer extends JPanel {
         // Draw chessboard image
         g.drawImage(boardImage.getImage(), 0, 0, getWidth(), getHeight(), this);
 
+        highlightKingIfCheck(g);
+
         if (canPaintMoves){
             Graphics2D g2d = (Graphics2D) g;
             float thickness = 2;
@@ -221,10 +228,10 @@ public class Renderer extends JPanel {
             g2d.setStroke(new BasicStroke(thickness));
             g2d.setColor(Color.YELLOW);
 
-            //
+
             for(Coordinate move : movingPiece.getMoves(b)){
                 Coordinate drawPosition = movingPiece.getDrawPosition();
-                if (move.equals(new Coordinate(convertToColumn(drawPosition.getX() + 32), convertToRow(drawPosition.getY() + 32)))) {
+                if (move.equals(new Coordinate(convertToColumn(drawPosition.getX() + SQUARE_SIZE / 2), convertToRow(drawPosition.getY() + SQUARE_SIZE / 2)))) {
                     g2d.setColor(new Color(255, 255, 0, 128));
                     g2d.fillRect(convertToPixelX(move.getX(), BASE_WIDTH), convertToPixelY(move.getY(), BASE_HEIGHT), SQUARE_SIZE, SQUARE_SIZE);
                     g2d.setColor(Color.YELLOW);
@@ -243,11 +250,27 @@ public class Renderer extends JPanel {
         }
     }
 
+    private void highlightKingIfCheck(Graphics g) {
+        King checkedKing;
+//        System.out.println("p1 checked: " + b.getPlayerOne().isInCheck());
+//        System.out.println("p2 checked: " + b.getPlayerTwo().isInCheck());
+        if (b.getPlayerOne().isInCheck())
+            checkedKing = b.getPlayerOne().getKing();
+        else if (b.getPlayerTwo().isInCheck())
+            checkedKing = b.getPlayerTwo().getKing();
+        else return;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(new Color(255, 0, 0, 128));
+        g2d.fillRect(checkedKing.getDrawPosition().getX(), checkedKing.getDrawPosition().getY(), SQUARE_SIZE, SQUARE_SIZE);
+
+    }
+
     public void performAiMove(ArrayList<Coordinate> move){
         if (!move.isEmpty()) {
             Coordinate from = move.getFirst();
             Coordinate to = move.getLast();
-            movingPiece = getPieceToMove(from);
+            movingPiece = getPiece(from);
             performMove(to, to.getX(), to.getY());
             repaint();
             e.switchPlayers();
@@ -272,8 +295,14 @@ public class Renderer extends JPanel {
         this.pieces.addAll(list);
     }
 
-    private Piece getPieceToMove(Coordinate coordinate) {
+    private Piece getPiece(Coordinate coordinate) {
+            System.out.println("get piece at " + coordinate);
         List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().equals(coordinate)).toList();
+        if (pieces1.isEmpty() && e.getPlayerTurn() == TEAM_TWO)
+            System.out.println("no piece");
+        else
+            if (!pieces1.isEmpty() && e.getPlayerTurn() == TEAM_TWO)
+                System.out.println(pieces1.getFirst());
 
         if (pieces1.isEmpty())
             return new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1));

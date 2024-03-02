@@ -35,4 +35,9 @@ public class Queen extends Piece {
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
 
     }
+
+    @Override
+    public String toString(){
+        return "Queen " + getTeam() + ": " + getPosition();
+    }
 }

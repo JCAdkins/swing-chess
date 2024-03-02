@@ -3,7 +3,6 @@ package engine.ui;
 import engine.pieces.Piece;
 import engine.player.Player;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import static engine.helpers.GlobalHelper.*;
 
@@ -50,6 +49,15 @@ public class Board {
     public ArrayList<Piece> getPieces() {
             return pieces;
     }
+
+    public Player getPlayerOne() {
+        return playerOne;
+    }
+
+    public Player getPlayerTwo() {
+        return playerTwo;
+    }
+
     public ArrayList<Piece> getT1Pieces() {
         ArrayList<Piece> list = new ArrayList<>();
         for (Piece piece : pieces) {
@@ -67,5 +75,12 @@ public class Board {
             }
         }
         return list;
+    }
+
+    public void checkAndSetCheck(Player player) {
+    }
+
+    public Player getOtherPlayer(int team) {
+        return playerOne.getTeam() == team ? playerTwo : playerOne;
     }
 }

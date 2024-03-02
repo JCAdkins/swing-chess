@@ -22,6 +22,7 @@ public class Bishop extends Piece {
     ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
         addDiagonalMoves(moves, x, y, getTeam(), b);
+
         return moves;
     }
 
@@ -32,5 +33,10 @@ public class Bishop extends Piece {
     @Override
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
 
+    }
+
+    @Override
+    public String toString(){
+        return "Bishop " + getTeam() + ": " + getPosition();
     }
 }
