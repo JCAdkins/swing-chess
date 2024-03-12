@@ -1,7 +1,6 @@
 package engine;
 
 import engine.pieces.Piece;
-import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
 import engine.ui.Board;
@@ -36,8 +35,9 @@ public class Engine implements Runnable {
 
     // Initialize all game components
     public void initialize() {
-        playerOne = new Human(TEAM_ONE, renderer.getPieceImages(1), false);
-        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2), true);
+        playerOne = new Human(TEAM_ONE, renderer.getPieceImages(1));
+//        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2));
+        playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(2));
         playerTurn = new AtomicInteger(TEAM_ONE);
 
         //========================================================================
@@ -97,13 +97,12 @@ public class Engine implements Runnable {
             if (board.checkGameStatus() != CONTINUE_GAME)
                 endGame(board.checkGameStatus());
 
-
         }
     }
 
     public void runPlayerChecks() {
-        playerOne.runChecks(board);
-        playerTwo.runChecks(board);
+        playerOne.runChecks(board, true);
+        playerTwo.runChecks(board, true);
     }
 
     public void switchPlayers(){
@@ -114,7 +113,20 @@ public class Engine implements Runnable {
         return playerTurn.get();
     }
 
-    private void endGame(int i) {
-//        System.out.println("Game over!\nCode: " + i);
+    private void endGame(int code) {
+        System.out.println("======= Game over! ========");
+        if (code == TEAM_ONE) {
+            if (playerTwo.isAI()) {
+                System.out.println("AI wins!");
+            } else {
+                System.out.println("Team 2 is winner!");
+            }
+        } else if (code == TEAM_TWO){
+            if (playerTwo.isAI())
+                System.out.println("You are a winner!");
+            else
+                System.out.println("Team 1 is winner!");
+            }
+        else System.out.println("Game is a draw.");
     }
 }

@@ -1,5 +1,6 @@
 package engine.pieces;
 
+import engine.player.Player;
 import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
@@ -13,17 +14,36 @@ public class Pawn extends Piece {
         this.isFirstMove = true;
     }
 
+    public Pawn(Piece piece) {
+        super(piece);
+    }
+
+    @Override
+    public Piece copy() {
+        return new Pawn(this); // Assuming Bishop has a copy constructor
+    }
+
     public void setIsFirstMove(boolean firstMove) {
         isFirstMove = firstMove;
     }
 
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
+    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
         ArrayList<Coordinate> moves = new ArrayList<>();
+        if (check) {
+            Player player = getPlayer(b);
+            if (!player.isInCheck() && pieceCannotMove(b))
+                return moves;
+            if (player.isInCheck()) {
+                moves = getAvailableMovesInCheck(b, moves);
+                return moves;
+            }
+        }
         boolean isValid = true, isDoubleValid = true, addTopLeft = false, addTopRight = false;
+        int x = position.getX();
+        int y = position.getY();
+
         for (Piece piece : b.getPieces()){
-            if (piece.getTeam() == getTeam())
-                continue;
             if (piece.getPosition().equals(new Coordinate(x, y + getTeam())))
                 isValid = false;
             if (piece.getPosition().equals(new Coordinate(x, y + 2 * getTeam())))
@@ -32,9 +52,6 @@ public class Pawn extends Piece {
                 addTopRight = true;
             if (piece.getPosition().equals(new Coordinate(x - 1, y + getTeam())))
                 addTopLeft = true;
-
-
-
         }
         if (isValid)
             moves.add(new Coordinate(x, y + getTeam()));

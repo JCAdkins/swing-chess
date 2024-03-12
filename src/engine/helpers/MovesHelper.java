@@ -7,11 +7,14 @@ import engine.ui.Coordinate;
 import java.util.ArrayList;
 
 public class MovesHelper {
-    public static void addDiagonalMoves(ArrayList<Coordinate> movesList, int x, int y, int team, Board b){
+    public static void addDiagonalMoves(ArrayList<Coordinate> movesList, Coordinate pos, int team, Board b){
         Coordinate topLeft = null;
         Coordinate topRight = null;
         Coordinate bottomLeft = null;
         Coordinate bottomRight = null;
+
+        int x = pos.getX();
+        int y = pos.getY();
 
         for(int i = 1; i < 8; i++){
             if (topRight == null)
@@ -42,15 +45,14 @@ public class MovesHelper {
             movesList.add(bottomRight);
     }
 
-    public static void addHorizontalAndVerticalMoves(ArrayList<Coordinate> movesList, int x, int y, int team, Board b){
-        boolean collisionTop = false;
-        boolean collisionBottom = false;
-        boolean collisionRight = false;
-        boolean collisionLeft = false;
+    public static void addHorizontalAndVerticalMoves(ArrayList<Coordinate> movesList, Coordinate pos, int team, Board b){
         Coordinate top = null;
         Coordinate bottom = null;
         Coordinate left = null;
         Coordinate right = null;
+
+        int x = pos.getX();
+        int y = pos.getY();
 
         for(int i = 1; i < 8; i++){
             if (top == null)

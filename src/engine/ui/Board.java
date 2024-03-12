@@ -1,9 +1,9 @@
 package engine.ui;
 
-import engine.pieces.Piece;
+import engine.pieces.*;
+import engine.player.*;
 import engine.player.Player;
 import java.util.ArrayList;
-
 import static engine.helpers.GlobalHelper.*;
 
 public class Board {
@@ -19,6 +19,16 @@ public class Board {
         renderer.setBoard(this);
     }
 
+    public Board(Board original) {
+        this.pieces = new ArrayList<>();
+        for (Piece piece : original.pieces) {
+            this.pieces.add(piece.copy()); // Assuming each Piece subclass implements a copy method
+        }
+
+        this.playerOne = original.playerOne.copy(); // Assuming Player subclasses implement a copy method
+        this.playerTwo = original.playerTwo.copy(); // Assuming Player subclasses implement a copy method
+    }
+
     public int checkGameStatus() {
         if (playerOne.getIsCheckMate())
             return TEAM_ONE;
@@ -27,6 +37,14 @@ public class Board {
         if (!playersCanMove())
             return DRAW;
         return CONTINUE_GAME;
+    }
+
+    public Piece getPiece(Piece piece){
+        for (Piece p : pieces){
+            if (p.equals(piece))
+                return p;
+        }
+        return null;
     }
 
     private boolean playersCanMove() {
@@ -77,10 +95,26 @@ public class Board {
         return list;
     }
 
-    public void checkAndSetCheck(Player player) {
-    }
 
     public Player getOtherPlayer(int team) {
         return playerOne.getTeam() == team ? playerTwo : playerOne;
+    }
+    public Player getPlayer(int team) {
+        return playerOne.getTeam() == team ? playerOne : playerTwo;
+    }
+
+    public void performCastle(Coordinate coordinate, Piece p) {
+        for (Piece piece : pieces){
+            if (piece.getTeam() != p.getTeam())
+                continue;
+            if (piece.getPosition().equals(coordinate)) {
+                piece.setPosition(p.getPosition());
+                if (piece instanceof Rook)
+                    ((Rook) piece).setCanCastle(false);
+                if (piece instanceof King)
+                    ((King) piece).setCanCastle(false);
+            }
+
+        }
     }
 }

@@ -1,6 +1,11 @@
 package engine.helpers;
 
+import engine.pieces.Piece;
+import engine.player.Player;
+import engine.ui.Board;
 import engine.ui.Coordinate;
+
+import java.util.ArrayList;
 
 public class GlobalHelper
 {
@@ -19,6 +24,7 @@ public class GlobalHelper
     public static final int BASE_HEIGHT = 512;
     public static final int ROWS = 8;
     public static final int COLUMNS = 8;
+    public static final Coordinate OFF_BOARD = new Coordinate(-100,-100);
 
     //==============================================
     //      Sprite image array index positions
@@ -59,7 +65,6 @@ public class GlobalHelper
     public static int convertToPixelY(int y, int boardHeight) {
         // Calculate the width and height of each square on the board
         int squareHeight = boardHeight / ROWS;
-
         // Return the pixel coordinates as a Coordinate object
         return (7 - y) * squareHeight;
     }

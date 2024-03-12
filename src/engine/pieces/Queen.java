@@ -1,5 +1,6 @@
 package engine.pieces;
 
+import engine.player.Player;
 import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
@@ -14,16 +15,27 @@ public class Queen extends Piece {
         super(isAI, position, drawPosition, team, sprite);
     }
 
-    /**
-     * @param x - The x position of the piece.
-     * @param y - The y position of the piece.
-     * @return Returns a list of all possible moves, both legal and illegal.
-     */
+    public Queen(Piece piece) {
+        super(piece);
+    }
+
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
+    public Piece copy() {
+        return new Queen(this); // Assuming Bishop has a copy constructor
+    }
+
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        addDiagonalMoves(moves, x, y, getTeam(),  b);
-        addHorizontalAndVerticalMoves(moves, x,y, getTeam(), b);
+        if (check) {
+            Player player = getPlayer(b);
+            if (!player.isInCheck() && pieceCannotMove(b))
+                return moves;
+            if (player.isInCheck())
+                return getAvailableMovesInCheck(b, moves);
+        }
+        addDiagonalMoves(moves, position, getTeam(),  b);
+        addHorizontalAndVerticalMoves(moves, position, getTeam(), b);
         return moves;
     }
 

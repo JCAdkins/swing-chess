@@ -5,18 +5,25 @@ import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import static engine.helpers.GlobalHelper.*;
 
 public abstract class Player {
 
     private ArrayList<Piece> pieces;
-    private final King king;
+
+    ArrayList<Piece> piecesThatHaveCheck;
+    private King king = null;
     private final int team;
     private final boolean isAI;
     private boolean inCheck, canMove, isCheckMate;
+    private final Image[] pieceImages;
 
     public Player(int team, Image[] pieceImages, boolean isAI) {
         this.pieces = new ArrayList<>();
+        this.piecesThatHaveCheck = new ArrayList<>();
+        this.pieceImages = pieceImages;
         this.team = team;
         this.isAI = isAI;
         this.inCheck = false;
@@ -44,6 +51,55 @@ public abstract class Player {
 
     }
 
+    public Player(Player player) {
+        ArrayList<Piece> copyPieces = new ArrayList<>();
+        this.piecesThatHaveCheck = new ArrayList<>();
+        for (Piece piece : player.getPieces()){
+            Piece p = null;
+            if (piece instanceof Bishop) {
+                p = new Bishop(piece);
+                copyPieces.add(p);
+            }
+            if (piece instanceof King) {
+                p = new King(piece);
+                copyPieces.add(p);
+            }
+            if (piece instanceof Knight) {
+                p = new Knight(piece);
+                copyPieces.add(p);
+            }
+            if (piece instanceof Pawn) {
+                p = new Pawn(piece);
+                copyPieces.add(p);
+            }
+            if (piece instanceof Queen) {
+                copyPieces.add(new Queen(piece));
+            }
+            if (piece instanceof Rook) {
+                copyPieces.add(new Rook(piece));
+            }
+            if (p != null && p.isHasCheck())
+                this.piecesThatHaveCheck.add(piece);
+        }
+
+        this.pieces = copyPieces;
+        this.pieceImages = Arrays.copyOf(player.getPieceImages(), player.getPieceImages().length);
+        this.team = player.getTeam();
+        this.isAI = player.isAI();
+        this.inCheck = player.isInCheck();
+        this.canMove = player.canMove;
+        this.isCheckMate = player.isCheckMate;
+
+        for (Piece piece : this.pieces) {
+            if (piece instanceof King && piece.getPosition().equals(player.king.getPosition())) {
+                this.king = (King) piece;
+                break;
+            }
+        }
+
+
+    }
+
     public ArrayList<Piece> getPieces() {
         return pieces;
     }
@@ -54,6 +110,10 @@ public abstract class Player {
 
     public int getTeam() {
         return team;
+    }
+
+    public Image[] getPieceImages() {
+        return pieceImages;
     }
 
     public boolean isInCheck() {
@@ -86,39 +146,61 @@ public abstract class Player {
         return canMove;
     }
 
-    public void setCanMove(boolean canMove) {
-        this.canMove = canMove;
-    }
-
-    public void setIsCheckMate(boolean isCheckMate){
-        this.isCheckMate = isCheckMate;
-    }
 
     public boolean getIsCheckMate(){
         return isCheckMate;
     }
 
-    public void runChecks(Board b) {
-        inCheck = isKingChecked(b);
-        for (Piece piece : pieces){
-            if (!piece.getMoves(b).isEmpty()) {
-                canMove = true;
-                break;
-            }
-                canMove = false;
-        }
+    public void runChecks(Board b, boolean check) {
+        inCheck = isKingChecked(b, check);
+        king.setInCheck(inCheck);
+        canMove = canPlayerMove(b);
+        isCheckMate = isPlayerMated(b);
     }
 
-    private boolean isKingChecked(Board b) {
+    private boolean isPlayerMated(Board b) {
+        return false;
+    }
+
+    private boolean canPlayerMove(Board b) {
+        for (Piece piece : pieces){
+            if (!piece.getMoves(b,true).isEmpty()) {
+                return true;
+            }
+        }
+            return false;
+    }
+
+    public boolean isCanMove() {
+        return canMove;
+    }
+
+    public boolean isCheckMate() {
+        return isCheckMate;
+    }
+
+    public ArrayList<Piece> getPiecesThatHaveCheck() {
+        return piecesThatHaveCheck;
+    }
+
+    public void setPiecesThatHaveCheck(ArrayList<Piece> list){
+        this.piecesThatHaveCheck = list;
+    }
+
+    private boolean isKingChecked(Board b, Boolean check) {
         Player otherPlayer = b.getOtherPlayer(team);
         ArrayList<Piece> opposingPieces = otherPlayer.getPieces();
         for (Piece piece : opposingPieces){
-            ArrayList<Coordinate> pieceMoves = piece.getMoves(b);
+            ArrayList<Coordinate> pieceMoves = piece.getMoves(b,check); //true?
             for (Coordinate move : pieceMoves){
-                if (king.getPosition().equals(move))
-                    return true;
+                if (king.getPosition().equals(move)) {
+                    this.piecesThatHaveCheck.add(piece);
+                    piece.setHasCheck(true);
+                }
             }
         }
-        return false;
+        return !piecesThatHaveCheck.isEmpty();
     }
+
+    public abstract Player copy();
 }

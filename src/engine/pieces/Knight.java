@@ -1,5 +1,6 @@
 package engine.pieces;
 
+import engine.player.Player;
 import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
@@ -11,14 +12,29 @@ public class Knight extends Piece {
         super(isAI,  position, drawPosition, team, sprite);
     }
 
-    /**
-     * @param x
-     * @param y
-     * @return
-     */
+    public Knight(Piece piece) {
+        super(piece);
+    }
+
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
+    public Piece copy() {
+        return new Knight(this); // Assuming Bishop has a copy constructor
+    }
+
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
         ArrayList<Coordinate> moves = new ArrayList<>();
+        if (check) {
+            Player player = getPlayer(b);
+            if (!player.isInCheck() && pieceCannotMove(b))
+                return moves;
+            if (player.isInCheck())
+                return getAvailableMovesInCheck(b, moves);
+        }
+
+        int x = position.getX();
+        int y = position.getY();
+
         moves.add(new Coordinate(x + 1, y + 2));
         moves.add(new Coordinate(x + 1, y - 2));
         moves.add(new Coordinate(x - 1, y + 2));
@@ -30,10 +46,6 @@ public class Knight extends Piece {
         return moves;
     }
 
-    /**
-     * @param possibleMoves
-     * @param b
-     */
     @Override
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
 

@@ -3,9 +3,11 @@ package engine.ui;
 import engine.Engine;
 import engine.pieces.*;
 import engine.player.Player;
+import engine.simulate.Move;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -13,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import static engine.helpers.GlobalHelper.*;
 
 public class Renderer extends JPanel {
@@ -23,10 +26,16 @@ public class Renderer extends JPanel {
     Piece movingPiece;
     Engine e;
     Coordinate previousPosition;
+    Coordinate kingPosition;
     private boolean canPaintMoves;
     Board b;
+    ArrayList<Move> moveHistory;
+
+    int count;
 
     public Renderer(Engine e) {
+        this.count = 0;
+        this.moveHistory = new ArrayList<>();
         this.e = e;
         this.canPaintMoves = false;
         // Load chessboard image
@@ -70,15 +79,18 @@ public class Renderer extends JPanel {
                     int row = convertToRow(e.getY());
                     Coordinate coordinate = new Coordinate(col, row);
                     if (isLegalMove(coordinate)) {
-                        performMove(coordinate, col, row);
+                        performMove(coordinate);
+                        removeCheckFromSelf();
                         checkAndSetCheck();
+                        moveHistory.add(new Move(movingPiece, previousPosition, movingPiece.getPosition(), count));
                     }else {
                         resetPiece();
                     }
                 } else
                         resetPiece();
-                repaint();
                 canPaintMoves = false;
+                repaint();
+
 
             }
         });
@@ -94,11 +106,20 @@ public class Renderer extends JPanel {
         });
     }
 
-    private void performMove(Coordinate coordinate, int col, int row) {
+    private void removeCheckFromSelf() {
+        Player p = b.getPlayer(movingPiece.getTeam());
+        if (!p.isInCheck())
+            return;
+
+        p.setInCheck(false);
+        p.setPiecesThatHaveCheck(new ArrayList<>());
+    }
+
+    private void performMove(Coordinate coordinate) {
         removeUniqueEvents(); // This removes castles/pawn double jump if piece is moved
         performCastle(coordinate); // Will move other piece involved in castle if castle otherwise will do nothing
         removePiece(coordinate); // If a piece is jumped then remove it
-        movePiece(coordinate, col, row);
+        movePiece(coordinate);
         switchPlayers();
     }
 
@@ -128,24 +149,13 @@ public class Renderer extends JPanel {
         }
     }
 
-    private void movePiece(Coordinate coordinate, int col, int row) {
-        movingPiece.setPosition(coordinate);
-        movingPiece.setDrawPosition(new Coordinate(convertToPixelX(col, 512), convertToPixelY(row, 512)));
+    private void movePiece(Coordinate to) {
+        movingPiece.setPosition(to);
+        movingPiece.setDrawPosition(new Coordinate(convertToPixelX(to.getX(), 512), convertToPixelY(to.getY(), 512)));
     }
 
     private void performCastle(Coordinate coordinate) {
-        for (Piece piece : pieces){
-            if (piece.getTeam() != movingPiece.getTeam())
-                continue;
-            if (piece.getPosition().equals(coordinate)) {
-                piece.setPosition(movingPiece.getPosition());
-                if (piece instanceof Rook)
-                    ((Rook) piece).setCanCastle(false);
-                if (piece instanceof King)
-                    ((King) piece).setCanCastle(false);
-            }
-
-        }
+        b.performCastle(coordinate, movingPiece);
     }
 
     // This method is called to remove the double jump from pawns after they've been moved and
@@ -165,7 +175,7 @@ public class Renderer extends JPanel {
     }
 
     private boolean isLegalMove(Coordinate coordinate) {
-        return movingPiece.getMoves(b).contains(coordinate);
+        return movingPiece.getMoves(b, true).contains(coordinate);
     }
 
     private int convertToRow(int y) {
@@ -228,15 +238,18 @@ public class Renderer extends JPanel {
             g2d.setStroke(new BasicStroke(thickness));
             g2d.setColor(Color.YELLOW);
 
-
-            for(Coordinate move : movingPiece.getMoves(b)){
+            ArrayList<Coordinate> movesList = movingPiece.getMoves(b,true);
+            for(Coordinate move : movesList){
                 Coordinate drawPosition = movingPiece.getDrawPosition();
                 if (move.equals(new Coordinate(convertToColumn(drawPosition.getX() + SQUARE_SIZE / 2), convertToRow(drawPosition.getY() + SQUARE_SIZE / 2)))) {
                     g2d.setColor(new Color(255, 255, 0, 128));
-                    g2d.fillRect(convertToPixelX(move.getX(), BASE_WIDTH), convertToPixelY(move.getY(), BASE_HEIGHT), SQUARE_SIZE, SQUARE_SIZE);
-                    g2d.setColor(Color.YELLOW);
+                }else{
+                    g2d.setColor(new Color(123,123,123));
                 }
+                g2d.fillRect(convertToPixelX(move.getX(), BASE_WIDTH), convertToPixelY(move.getY(), BASE_HEIGHT), SQUARE_SIZE, SQUARE_SIZE);
+                g2d.setColor(Color.YELLOW);
                 g2d.drawRect(convertToPixelX(move.getX(), BASE_WIDTH), convertToPixelY(move.getY(), BASE_HEIGHT), SQUARE_SIZE, SQUARE_SIZE);
+
             }
             g2d.setStroke(oldStroke);
         }
@@ -252,8 +265,8 @@ public class Renderer extends JPanel {
 
     private void highlightKingIfCheck(Graphics g) {
         King checkedKing;
-//        System.out.println("p1 checked: " + b.getPlayerOne().isInCheck());
-//        System.out.println("p2 checked: " + b.getPlayerTwo().isInCheck());
+        if (b == null)
+            return;
         if (b.getPlayerOne().isInCheck())
             checkedKing = b.getPlayerOne().getKing();
         else if (b.getPlayerTwo().isInCheck())
@@ -271,7 +284,7 @@ public class Renderer extends JPanel {
             Coordinate from = move.getFirst();
             Coordinate to = move.getLast();
             movingPiece = getPiece(from);
-            performMove(to, to.getX(), to.getY());
+            performMove(to);
             repaint();
             e.switchPlayers();
         }
@@ -296,18 +309,11 @@ public class Renderer extends JPanel {
     }
 
     private Piece getPiece(Coordinate coordinate) {
-            System.out.println("get piece at " + coordinate);
         List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().equals(coordinate)).toList();
-        if (pieces1.isEmpty() && e.getPlayerTurn() == TEAM_TWO)
-            System.out.println("no piece");
-        else
-            if (!pieces1.isEmpty() && e.getPlayerTurn() == TEAM_TWO)
-                System.out.println(pieces1.getFirst());
-
         if (pieces1.isEmpty())
-            return new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1));
+            return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
         if (pieces1.getFirst().getTeam() != e.getPlayerTurn())
-            return new Pawn(false, new Coordinate(-100,-100), new Coordinate(-100,-100), -1, new BufferedImage(1,1,1));
+            return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
         return pieces1.getFirst();
     }
 }

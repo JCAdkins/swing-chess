@@ -1,11 +1,11 @@
 package engine.pieces;
 
+import engine.player.Player;
 import engine.ui.Board;
 import engine.ui.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
 
-import static engine.helpers.MovesHelper.addDiagonalMoves;
 import static engine.helpers.MovesHelper.addHorizontalAndVerticalMoves;
 
 public class Rook extends Piece {
@@ -17,15 +17,26 @@ public class Rook extends Piece {
         this.canCastle = true;
     }
 
-    /**
-     * @param x
-     * @param y
-     * @return
-     */
+    public Rook(Piece piece) {
+        super(piece);
+    }
+
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(int x, int y, Board b) {
+    public Piece copy() {
+        return new Rook(this); // Assuming Bishop has a copy constructor
+    }
+
+    @Override
+    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        addHorizontalAndVerticalMoves(moves, x, y, getTeam(), b);
+        if (check) {
+            Player player = getPlayer(b);
+            if (!player.isInCheck() && pieceCannotMove(b))
+                return moves;
+            if (player.isInCheck())
+                return getAvailableMovesInCheck(b, moves);
+        }
+        addHorizontalAndVerticalMoves(moves, position, getTeam(), b);
         return moves;
     }
 

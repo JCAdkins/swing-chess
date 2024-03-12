@@ -9,8 +9,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class AI extends Player{
-    public AI(int team, Image[] pieceImages, boolean isAI) {
-        super(team, pieceImages, isAI);
+    public AI(int team, Image[] pieceImages) {
+        super(team, pieceImages, true);
+    }
+
+    public AI(Player player) {
+        super(player);
     }
 
     /**
@@ -27,12 +31,20 @@ public class AI extends Player{
         Random r = new Random();
         Piece pieceToGetMoveFrom = pieces1.get(r.nextInt(size));
 
-        size = pieceToGetMoveFrom.getMoves(b).size();
+        size = pieceToGetMoveFrom.getMoves(b, true).size();
         Coordinate from = pieceToGetMoveFrom.getPosition();
-        Coordinate to = pieceToGetMoveFrom.getMoves(b).get(r.nextInt(size));
+        Coordinate to = pieceToGetMoveFrom.getMoves(b,true).get(r.nextInt(size));
         ArrayList<Coordinate> retList = new ArrayList<>();
         retList.add(from);
         retList.add(to);
         return retList;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public Player copy() {
+        return new AI(this);
     }
 }
