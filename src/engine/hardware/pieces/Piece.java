@@ -18,7 +18,6 @@ public abstract class Piece {
     Coordinate drawPosition;
     private final int team;
     private final Image sprite;
-    private boolean hasCheck;
 
     public Piece(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
         this.isAI = isAI;
@@ -27,7 +26,6 @@ public abstract class Piece {
         this.drawPosition = drawPosition;
         this.team = team;
         this.sprite = sprite;
-        this.hasCheck =  false;
     }
 
     public Piece(Piece piece) {
@@ -36,7 +34,6 @@ public abstract class Piece {
         this.drawPosition = new Coordinate(piece.drawPosition.getX(), piece.drawPosition.getY());
         this.team = piece.getTeam();
         this.sprite = piece.getSprite();
-        this.hasCheck = piece.hasCheck;
         this.isAlive = piece.isAlive;
     }
 
@@ -69,31 +66,22 @@ public abstract class Piece {
         return team;
     }
 
-    public boolean isHasCheck() {
-        return hasCheck;
-    }
-
-    public void setHasCheck(boolean hasCheck) {
-        this.hasCheck = hasCheck;
-    }
-
     public Image getSprite() {
         return sprite;
     }
 
     public ArrayList<Coordinate> getMovesDeep(Board b, boolean check) {
         ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b, check);
+        addCastles(possibleMoves, b);
         removeIllegalMoves(possibleMoves, b);
-        addCastles(possibleMoves, b);
         return possibleMoves;
     }
 
-    public ArrayList<Coordinate> getMovesShallow(Board b) {
-        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b, false);
-        addCastles(possibleMoves, b);
-        return possibleMoves;
-
-    }
+//    public ArrayList<Coordinate> getMovesShallow(Board b) {
+//        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b, false);
+//        addCastles(possibleMoves, b);
+//        return possibleMoves;
+//    }
 
     public abstract Piece copy();
 
@@ -106,7 +94,7 @@ public abstract class Piece {
     void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b){
         removeOffBoardMoves(possibleMoves, b);
         removeAllMovesOnSelf(possibleMoves, b);
-            removeAllOtherMoves(possibleMoves, b);
+        removeAllOtherMoves(possibleMoves, b);
     }
 
     public ArrayList<Coordinate> getAvailableMovesInCheck(Board b, ArrayList<Coordinate> movesList) {

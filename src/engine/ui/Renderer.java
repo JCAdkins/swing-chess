@@ -20,7 +20,7 @@ import java.util.List;
 
 import static engine.helpers.GlobalHelper.*;
 
-public class Renderer extends JPanel {
+public class Renderer extends JPanel implements KeyListener {
     private Image[] pieceImagesT1 = new BufferedImage[TEAM_SIZE];
     private Image[] pieceImagesT2 = new BufferedImage[TEAM_SIZE];
     private final ImageIcon boardImage;
@@ -31,7 +31,6 @@ public class Renderer extends JPanel {
     private boolean canPaintMoves;
     Board b;
     ArrayList<Move> moveHistory;
-
     int count;
 
     public Renderer(Engine engine) {
@@ -52,6 +51,9 @@ public class Renderer extends JPanel {
                 repaint();
             }
         });
+
+        setFocusable(true); // Ensure this component can receive key events
+        addKeyListener(this);
 
         addMouseListener(new MouseAdapter() {
             /**
@@ -231,6 +233,7 @@ public class Renderer extends JPanel {
     // Override the paintComponent method to draw the chessboard and pieces
     @Override
     protected void paintComponent(Graphics g) {
+
         super.paintComponent(g);
 
         // Draw chessboard image
@@ -321,5 +324,47 @@ public class Renderer extends JPanel {
         if (pieces1.getFirst().getTeam() != engine.getPlayerTurn())
             return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
         return pieces1.getFirst();
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        // Handle key pressed event
+        int keyCode = e.getKeyCode();
+        if (keyCode == KeyEvent.VK_P) {
+           printAppDump(b.getPlayer(engine.getPlayerTurn()));
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // Handle key released event
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // Handle key typed event
+    }
+
+    private void printAppDump(Player player) {
+        System.out.println("======= Player " + player.getTeam() + "=======");
+        System.out.println("inCheck: " + player.isInCheck());
+        System.out.println("canMove: " + player.canMove());
+        System.out.println("pieces: " + player.getPieces().size());
+        ArrayList<Coordinate> moves = new ArrayList<>();
+        for(Piece p : player.getPieces()){
+            moves.addAll(p.getMovesDeep(b, true));
+        }
+        System.out.println("available moves: " + moves.size());
+    }
+
+    public void reset() {
+        pieces.clear(); // Clear the list of pieces
+        movingPiece = null; // Reset the currently moving piece
+        previousPosition = null; // Reset the previous position
+        canPaintMoves = false; // Reset the flag for painting move highlights
+        b = null; // Reset the board reference
+        moveHistory.clear(); // Clear the move history
+        count = 0; // Reset any other game state variables
+        repaint(); // Repaint the renderer to reflect the changes
     }
 }

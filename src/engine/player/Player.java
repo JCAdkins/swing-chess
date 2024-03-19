@@ -17,7 +17,7 @@ public abstract class Player {
     private King king = null;
     private final int team;
     private final boolean isAI;
-    private boolean inCheck, canMove, isCheckMate;
+    private boolean inCheck, canMove;
     private final Image[] pieceImages;
 
     public Player(int team, Image[] pieceImages, boolean isAI) {
@@ -26,9 +26,8 @@ public abstract class Player {
         this.pieceImages = pieceImages;
         this.team = team;
         this.isAI = isAI;
-        this.inCheck = false;
-        this.canMove = true;
-        this.isCheckMate = false;
+        this.inCheck = true;
+        this.canMove = false;
         for(int i = 0; i < 8; i++){
             int PAWN_START = team == TEAM_ONE ? 1 : 6;
             pieces.add(new Pawn(isAI, new Coordinate(i, PAWN_START),  convertToPixelCoordinate(i, PAWN_START), team, pieceImages[PAWN]));
@@ -78,8 +77,8 @@ public abstract class Player {
             if (piece instanceof Rook) {
                 copyPieces.add(new Rook(piece));
             }
-            if (p != null && p.isHasCheck())
-                this.piecesThatHaveCheck.add(piece);
+            if (player.piecesThatHaveCheck.contains(p))
+                this.piecesThatHaveCheck.add(p);
         }
 
         this.pieces = copyPieces;
@@ -88,7 +87,6 @@ public abstract class Player {
         this.isAI = player.isAI();
         this.inCheck = player.isInCheck();
         this.canMove = player.canMove;
-        this.isCheckMate = player.isCheckMate;
 
         for (Piece piece : this.pieces) {
             if (piece instanceof King && piece.getPosition().equals(player.king.getPosition())) {
@@ -147,20 +145,9 @@ public abstract class Player {
         return canMove;
     }
 
-
-    public boolean getIsCheckMate(){
-        return isCheckMate;
-    }
-
     public void runChecks(Board b, boolean check) {
         inCheck = isKingChecked(b, check);
-        king.setInCheck(inCheck);
         canMove = canPlayerMove(b);
-        isCheckMate = isPlayerMated();
-    }
-
-    private boolean isPlayerMated() {
-        return inCheck && !canMove;
     }
 
     private boolean canPlayerMove(Board b) {
@@ -187,7 +174,6 @@ public abstract class Player {
             for (Coordinate move : pieceMoves){
                 if (king.getPosition().equals(move)) {
                     this.piecesThatHaveCheck.add(piece);
-                    piece.setHasCheck(true);
                 }
             }
         }

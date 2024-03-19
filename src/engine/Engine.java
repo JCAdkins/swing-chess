@@ -1,23 +1,22 @@
 package engine;
 
 import engine.hardware.pieces.Piece;
-import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
 import engine.hardware.Board;
-import engine.hardware.Coordinate;
+import engine.ui.components.EndGamePanel;
 import engine.ui.Renderer;
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static engine.helpers.GlobalHelper.*;
 
 public class Engine implements Runnable {
     JFrame frame;
+    EndGamePanel endGamePanel;
     Renderer renderer;
-    Scanner scanner;
     Player playerOne;
     Player playerTwo;
     Board board;
@@ -28,11 +27,21 @@ public class Engine implements Runnable {
     // Generic bootstrap code to initialize a swing project.
     // Renderer is where all graphics handling occurs.
     public Engine() {
-        this.scanner = new Scanner(System.in);
         this.renderer = new Renderer(this);
         this.frame = new JFrame("Chessboard");
+        this.endGamePanel = new EndGamePanel(this);
+        endGamePanel.setVisible(false);
+
+        JLayeredPane containerPanel = new JLayeredPane();
+        containerPanel.setPreferredSize(renderer.getPreferredSize());
+        containerPanel.setBackground(Color.black);
+        renderer.setBounds(0,0,512,518);
+        endGamePanel.setBounds(96,96,320,320);
+        containerPanel.add(renderer, 0, 0);
+        containerPanel.add(endGamePanel, 1, 0);
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(renderer);
+        frame.getContentPane().add(containerPanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -41,8 +50,8 @@ public class Engine implements Runnable {
     // Initialize all game components
     public void initialize() {
         playerOne = new Human(TEAM_ONE, renderer.getPieceImages(TEAM_ONE));
-        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2));
-//        playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
+//        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2));
+        playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
         playerTurn = new AtomicInteger(TEAM_ONE);
 
         //========================================================================
@@ -75,8 +84,6 @@ public class Engine implements Runnable {
         }
     }
 
-    String input;
-
     @Override
     public void run(){
         while(running){
@@ -86,8 +93,8 @@ public class Engine implements Runnable {
                 refreshGame();
             }
 
-            if (board.checkGameStatus() != CONTINUE_GAME)
-                endGame(board.checkGameStatus());
+            if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
+                endGame(board.checkGameStatus(playerTurn.get()));
 
             if (playerTurn.get() == TEAM_TWO && playerTwo.isAI()) {
                     renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
@@ -95,21 +102,9 @@ public class Engine implements Runnable {
                     refreshGame();
             }
 
-            if (board.checkGameStatus() != CONTINUE_GAME)
-                endGame(board.checkGameStatus());
-
+            if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
+                endGame(board.checkGameStatus(playerTurn.get()));
         }
-    }
-
-    private void printAppDump(Player player) {
-        System.out.println("======= Player " + player.getTeam() + "=======");
-        System.out.println("inCheck: " + player.isInCheck());
-        System.out.println("canMove: " + player.canMove());
-        ArrayList<Coordinate> moves = new ArrayList<>();
-        for(Piece p : player.getPieces()){
-            moves.addAll(p.getMovesDeep(board, true));
-        }
-        System.out.println("available moves: " + moves.size());
     }
 
     private void refreshGame() {
@@ -131,19 +126,34 @@ public class Engine implements Runnable {
     }
 
     private void endGame(int code) {
-        System.out.println("======= Game over! ========");
-        if (code == TEAM_ONE) {
-            if (playerTwo.isAI()) {
-                System.out.println("AI wins!");
-            } else {
-                System.out.println("Team 2 is winner!");
-            }
-        } else if (code == TEAM_TWO){
-            if (playerTwo.isAI())
-                System.out.println("You are a winner!");
+        String message;
+        if (code == CHECK_MATE) {
+            if (playerTurn.get() == TEAM_ONE)
+                message = "Player two wins!";
             else
-                System.out.println("Team 1 is winner!");
-            }
-        else System.out.println("Game is a draw.");
+                message = "Player one wins!";
+        }
+        else
+            message = "Game's a draw!";
+
+        System.out.println("game over.");
+        endGamePanel.setMessage(message);
+        endGamePanel.setVisible(true);
+        stop();
+
+
+    }
+
+    public void replayGame() {
+        renderer.reset();
+        initialize();
+        endGamePanel.setVisible(false);
+    }
+
+    public void changeSettings() {
+    }
+
+    public void quit() {
+        System.exit(0);
     }
 }

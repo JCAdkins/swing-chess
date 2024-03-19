@@ -8,6 +8,7 @@ public class GlobalHelper
     //      Game condition variables
     public static final int CONTINUE_GAME = 0;
     public static final int DRAW = 3;
+    public static final int CHECK_MATE = 2;
     public static final int SWITCH_TEAM = -1;
     public static final int TEAM_ONE = 1;
     public static final int TEAM_TWO = -1;

@@ -30,13 +30,15 @@ public class Board {
         this.playerTwo = original.playerTwo.copy(); // Assuming Player subclasses implement a copy method
     }
 
-    public int checkGameStatus() {
-        if (playerOne.getIsCheckMate())
-            return TEAM_ONE;
-        if (playerTwo.getIsCheckMate())
-            return TEAM_TWO;
-        if (!playersCanMove())
-            return DRAW;
+    public int checkGameStatus(int playerTurn) {
+        Player player = getPlayer(playerTurn);
+
+        if (!player.canMove()) {
+            if (player.isInCheck())
+                return CHECK_MATE;
+            else
+                return DRAW;
+        }
         return CONTINUE_GAME;
     }
 
