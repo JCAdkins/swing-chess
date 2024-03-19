@@ -1,7 +1,7 @@
 package engine.simulate;
 
-import engine.pieces.Piece;
-import engine.ui.Coordinate;
+import engine.hardware.pieces.Piece;
+import engine.hardware.Coordinate;
 
 public class Move {
     Piece piece = null;

@@ -1,12 +1,11 @@
 package engine.player;
 
-import engine.pieces.Piece;
-import engine.ui.Board;
-import engine.ui.Coordinate;
+import engine.hardware.pieces.Piece;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class Human extends Player{
 

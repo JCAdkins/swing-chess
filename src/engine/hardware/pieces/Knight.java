@@ -1,8 +1,8 @@
-package engine.pieces;
+package engine.hardware.pieces;
 
 import engine.player.Player;
-import engine.ui.Board;
-import engine.ui.Coordinate;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -26,7 +26,7 @@ public class Knight extends Piece {
         ArrayList<Coordinate> moves = new ArrayList<>();
         if (check) {
             Player player = getPlayer(b);
-            if (!player.isInCheck() && pieceCannotMove(b))
+            if (!player.isInCheck() && pieceMoveWillResultInCheck(b))
                 return moves;
             if (player.isInCheck())
                 return getAvailableMovesInCheck(b, moves);
@@ -46,6 +46,10 @@ public class Knight extends Piece {
         return moves;
     }
 
+    /**
+     * @param possibleMoves
+     * @param b
+     */
     @Override
     void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
 

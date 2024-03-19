@@ -1,24 +1,27 @@
 package engine.simulate;
 
-import engine.pieces.Piece;
+import engine.hardware.pieces.King;
+import engine.hardware.pieces.Piece;
 import engine.player.Player;
-import engine.ui.Board;
-import engine.ui.Coordinate;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 import java.util.ArrayList;
 
 import static engine.helpers.GlobalHelper.OFF_BOARD;
 import static engine.helpers.GlobalHelper.TEAM_ONE;
 
-public class Simulator {
+public class BoardSimulator {
     private Board simBoard;
     private final Board originalBoard;
     private final Player playerOne;
     private final Player playerTwo;
 
-    public Simulator(Board b) {
+    public BoardSimulator(Board b) {
         this.simBoard = new Board(b);
         this.originalBoard = new Board(b);
         this.playerOne = simBoard.getPlayerOne();
+        if (playerOne.getKing().getPosition().getX() == 5)
+            System.out.println("..");
         this.playerTwo = simBoard.getPlayerTwo();
     }
 
@@ -26,7 +29,7 @@ public class Simulator {
         this.simBoard = new Board(originalBoard);
     }
 
-    public boolean pieceMoveWillResultInCheck(Piece p) {
+    public boolean movingThePieceWillResultInCheck(Piece p) {
         Piece copyPiece = null;
         boolean retVal = false;
 
@@ -43,7 +46,7 @@ public class Simulator {
             Coordinate kingPosition = simBoard.getPlayer(copyPiece.getTeam()).getKing().getPosition();
 
             for (Piece opposingPiece : opposingPlayer.getPieces()) {
-                if (opposingPiece.getMoves(simBoard, false).contains(kingPosition)) {
+                if (opposingPiece.getMovesDeep(simBoard, false).contains(kingPosition)) {
                     retVal = true;
                     break;
                 }
@@ -56,27 +59,31 @@ public class Simulator {
 
 
     public boolean isInCheckAfterMove(Coordinate move, Piece movingPiece){
+        Coordinate kingPosition = movingPiece instanceof King ?
+                move : simBoard.getPlayer(movingPiece.getTeam()).getKing().getPosition();
         Piece copyPiece = simBoard.getPiece(movingPiece);
-        copyPiece.setPosition(move);
-        Coordinate kingPosition = simBoard.getPlayer(movingPiece.getTeam()).getKing().getPosition();
+        if (copyPiece != null)
+            copyPiece.setPosition(move);
         ArrayList<Piece> opposingPieces = simBoard.getOtherPlayer(movingPiece.getTeam()).getPieces();
 
         // If move will jump piece we need to remove that piece from the board
-        opposingPieces.removeIf(p -> move.equals(p.getPosition()));
+        opposingPieces.removeIf(p -> p.getPosition().equals(move));
 
-        ArrayList<Coordinate> opposingPieceMoves;
-        for (Piece p : opposingPieces){
-            opposingPieceMoves = p.getMoves(simBoard, false);
-                if (opposingPieceMoves.contains(kingPosition))
-                    return true;
-        }
-        return false;
+        return piecesMovesContainsKing(opposingPieces, kingPosition);
     }
 
     public void removePieces(ArrayList<Piece> piecesToRemove){
         for (Piece piece : piecesToRemove){
             simBoard.removePiece(piece);
         }
+    }
+
+    private boolean piecesMovesContainsKing(ArrayList<Piece> opposingPieces, Coordinate kingPosition){
+        for (Piece p : opposingPieces){
+            if (p.getMovesDeep(simBoard, false).contains(kingPosition))
+                return true;
+        }
+        return false;
     }
 
     public void runPlayerCheck(int team){
@@ -87,4 +94,22 @@ public class Simulator {
 
     }
 
+    public boolean kingIsMovingIntoCheck(Coordinate move, King king) {
+        boolean retVal = false;
+        Piece copyKing = simBoard.getPiece(king);
+
+        if (copyKing != null) {
+            copyKing.setPosition(move);
+            Player opposingPlayer = simBoard.getOtherPlayer(copyKing.getTeam());
+            Coordinate kingPosition = copyKing.getPosition();
+
+            for (Piece opposingPiece : opposingPlayer.getPieces()) {
+                if (opposingPiece.getMovesDeep(simBoard, false).contains(kingPosition)) {
+                    retVal = true;
+                    break;
+                }
+            }
+        }
+        return retVal;
+    }
 }

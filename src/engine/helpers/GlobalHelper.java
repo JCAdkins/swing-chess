@@ -1,11 +1,6 @@
 package engine.helpers;
 
-import engine.pieces.Piece;
-import engine.player.Player;
-import engine.ui.Board;
-import engine.ui.Coordinate;
-
-import java.util.ArrayList;
+import engine.hardware.Coordinate;
 
 public class GlobalHelper
 {
@@ -25,6 +20,18 @@ public class GlobalHelper
     public static final int ROWS = 8;
     public static final int COLUMNS = 8;
     public static final Coordinate OFF_BOARD = new Coordinate(-100,-100);
+
+    //=============================================================================
+    //           Coordinates Involved in Castling
+    public static final Coordinate KING_CASTLE_ONE_T1 = new Coordinate(2,0);
+    public static final Coordinate KING_CASTLE_TWO_T1 = new Coordinate(6,0);
+    public static final Coordinate KING_CASTLE_ONE_T2 = new Coordinate(2,7);
+    public static final Coordinate KING_CASTLE_TWO_T2 = new Coordinate(6,7);
+    public static final Coordinate ROOK_CASTLE_ONE_T1 = new Coordinate(3,0);
+    public static final Coordinate ROOK_CASTLE_TWO_T1 = new Coordinate(5,0);
+    public static final Coordinate ROOK_CASTLE_ONE_T2 = new Coordinate(3,7);
+    public static final Coordinate ROOK_CASTLE_TWO_T2 = new Coordinate(5,7);
+    //============================================================================
 
     //==============================================
     //      Sprite image array index positions

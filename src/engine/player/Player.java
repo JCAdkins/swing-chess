@@ -1,8 +1,8 @@
 package engine.player;
 
-import engine.pieces.*;
-import engine.ui.Board;
-import engine.ui.Coordinate;
+import engine.hardware.pieces.*;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,6 +130,7 @@ public abstract class Player {
 
     public void removePiece(Piece pieceToRemove) {
         this.pieces.remove(pieceToRemove);
+        pieceToRemove.remove();
     }
 
     public King getKing(){
@@ -155,28 +156,19 @@ public abstract class Player {
         inCheck = isKingChecked(b, check);
         king.setInCheck(inCheck);
         canMove = canPlayerMove(b);
-        isCheckMate = isPlayerMated(b);
+        isCheckMate = isPlayerMated();
     }
 
-    private boolean isPlayerMated(Board b) {
-        return false;
+    private boolean isPlayerMated() {
+        return inCheck && !canMove;
     }
 
     private boolean canPlayerMove(Board b) {
         for (Piece piece : pieces){
-            if (!piece.getMoves(b,true).isEmpty()) {
+            if (!piece.getMovesDeep(b,true).isEmpty())
                 return true;
-            }
         }
             return false;
-    }
-
-    public boolean isCanMove() {
-        return canMove;
-    }
-
-    public boolean isCheckMate() {
-        return isCheckMate;
     }
 
     public ArrayList<Piece> getPiecesThatHaveCheck() {
@@ -191,7 +183,7 @@ public abstract class Player {
         Player otherPlayer = b.getOtherPlayer(team);
         ArrayList<Piece> opposingPieces = otherPlayer.getPieces();
         for (Piece piece : opposingPieces){
-            ArrayList<Coordinate> pieceMoves = piece.getMoves(b,check); //true?
+            ArrayList<Coordinate> pieceMoves = piece.getMovesDeep(b,check); //true?
             for (Coordinate move : pieceMoves){
                 if (king.getPosition().equals(move)) {
                     this.piecesThatHaveCheck.add(piece);

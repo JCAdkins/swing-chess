@@ -1,7 +1,9 @@
 package engine.ui;
 
 import engine.Engine;
-import engine.pieces.*;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
+import engine.hardware.pieces.*;
 import engine.player.Player;
 import engine.simulate.Move;
 
@@ -24,19 +26,18 @@ public class Renderer extends JPanel {
     private final ImageIcon boardImage;
     private final ArrayList<Piece> pieces = new ArrayList<>();
     Piece movingPiece;
-    Engine e;
+    Engine engine;
     Coordinate previousPosition;
-    Coordinate kingPosition;
     private boolean canPaintMoves;
     Board b;
     ArrayList<Move> moveHistory;
 
     int count;
 
-    public Renderer(Engine e) {
+    public Renderer(Engine engine) {
         this.count = 0;
         this.moveHistory = new ArrayList<>();
-        this.e = e;
+        this.engine = engine;
         this.canPaintMoves = false;
         // Load chessboard image
         boardImage = new ImageIcon("sbs_-_2d_chess_pack/Top Down/Boards/Tops/Top - Marble 2 TD 512x520.png");
@@ -82,6 +83,7 @@ public class Renderer extends JPanel {
                         performMove(coordinate);
                         removeCheckFromSelf();
                         checkAndSetCheck();
+                        switchPlayers();
                         moveHistory.add(new Move(movingPiece, previousPosition, movingPiece.getPosition(), count));
                     }else {
                         resetPiece();
@@ -106,7 +108,7 @@ public class Renderer extends JPanel {
         });
     }
 
-    private void removeCheckFromSelf() {
+    public void removeCheckFromSelf() {
         Player p = b.getPlayer(movingPiece.getTeam());
         if (!p.isInCheck())
             return;
@@ -116,11 +118,10 @@ public class Renderer extends JPanel {
     }
 
     private void performMove(Coordinate coordinate) {
-        removeUniqueEvents(); // This removes castles/pawn double jump if piece is moved
         performCastle(coordinate); // Will move other piece involved in castle if castle otherwise will do nothing
+        removeUniqueEvents(); // This removes castles/pawn double jump if piece is moved
         removePiece(coordinate); // If a piece is jumped then remove it
         movePiece(coordinate);
-        switchPlayers();
     }
 
     private boolean isInBoardBounds(MouseEvent e) {
@@ -128,11 +129,11 @@ public class Renderer extends JPanel {
     }
 
     private void switchPlayers(){
-        e.switchPlayers();
+        engine.switchPlayers();
     }
 
     private void checkAndSetCheck(){
-        e.runPlayerChecks();
+        engine.runPlayerChecks();
     }
 
     private void removePiece(Coordinate coordinate){
@@ -164,9 +165,9 @@ public class Renderer extends JPanel {
         if (movingPiece instanceof Pawn)
             ((Pawn) movingPiece).setIsFirstMove(false);
         if (movingPiece instanceof King)
-            ((King) movingPiece).setCanCastle(false);
+            ((King) movingPiece).setFirstMove(false);
         if (movingPiece instanceof Rook)
-            ((Rook) movingPiece).setCanCastle(false);
+            ((Rook) movingPiece).setFirstMove(false);
     }
 
     private void resetPiece() {
@@ -175,7 +176,13 @@ public class Renderer extends JPanel {
     }
 
     private boolean isLegalMove(Coordinate coordinate) {
-        return movingPiece.getMoves(b, true).contains(coordinate);
+        ArrayList<Coordinate> moves = movingPiece.getMovesDeep(b, true);
+        for (Coordinate m : moves){
+            if (m.positionEquals(coordinate)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int convertToRow(int y) {
@@ -237,11 +244,10 @@ public class Renderer extends JPanel {
             Stroke oldStroke = g2d.getStroke();
             g2d.setStroke(new BasicStroke(thickness));
             g2d.setColor(Color.YELLOW);
-
-            ArrayList<Coordinate> movesList = movingPiece.getMoves(b,true);
+            ArrayList<Coordinate> movesList = movingPiece.getMovesDeep(b,true);
             for(Coordinate move : movesList){
                 Coordinate drawPosition = movingPiece.getDrawPosition();
-                if (move.equals(new Coordinate(convertToColumn(drawPosition.getX() + SQUARE_SIZE / 2), convertToRow(drawPosition.getY() + SQUARE_SIZE / 2)))) {
+                if (move.positionEquals(new Coordinate(convertToColumn(drawPosition.getX() + SQUARE_SIZE / 2), convertToRow(drawPosition.getY() + SQUARE_SIZE / 2)))) {
                     g2d.setColor(new Color(255, 255, 0, 128));
                 }else{
                     g2d.setColor(new Color(123,123,123));
@@ -286,7 +292,7 @@ public class Renderer extends JPanel {
             movingPiece = getPiece(from);
             performMove(to);
             repaint();
-            e.switchPlayers();
+            engine.switchPlayers();
         }
     }
 
@@ -309,10 +315,10 @@ public class Renderer extends JPanel {
     }
 
     private Piece getPiece(Coordinate coordinate) {
-        List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().equals(coordinate)).toList();
+        List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().positionEquals(coordinate)).toList();
         if (pieces1.isEmpty())
             return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
-        if (pieces1.getFirst().getTeam() != e.getPlayerTurn())
+        if (pieces1.getFirst().getTeam() != engine.getPlayerTurn())
             return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
         return pieces1.getFirst();
     }

@@ -1,8 +1,8 @@
 package engine.player;
 
-import engine.pieces.Piece;
-import engine.ui.Board;
-import engine.ui.Coordinate;
+import engine.hardware.pieces.Piece;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -30,10 +30,9 @@ public class AI extends Player{
         int size = pieces1.size();
         Random r = new Random();
         Piece pieceToGetMoveFrom = pieces1.get(r.nextInt(size));
-
-        size = pieceToGetMoveFrom.getMoves(b, true).size();
+        size = pieceToGetMoveFrom.getMovesDeep(b, true).size();
         Coordinate from = pieceToGetMoveFrom.getPosition();
-        Coordinate to = pieceToGetMoveFrom.getMoves(b,true).get(r.nextInt(size));
+        Coordinate to = pieceToGetMoveFrom.getMovesDeep(b,true).get(r.nextInt(size));
         ArrayList<Coordinate> retList = new ArrayList<>();
         retList.add(from);
         retList.add(to);

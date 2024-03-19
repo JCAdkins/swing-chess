@@ -1,8 +1,8 @@
 package engine.helpers;
 
-import engine.pieces.Piece;
-import engine.ui.Board;
-import engine.ui.Coordinate;
+import engine.hardware.pieces.Piece;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 
 import java.util.ArrayList;
 

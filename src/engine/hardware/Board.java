@@ -1,8 +1,9 @@
-package engine.ui;
+package engine.hardware;
 
-import engine.pieces.*;
-import engine.player.*;
+import engine.hardware.pieces.*;
 import engine.player.Player;
+import engine.ui.Renderer;
+
 import java.util.ArrayList;
 import static engine.helpers.GlobalHelper.*;
 
@@ -104,17 +105,60 @@ public class Board {
     }
 
     public void performCastle(Coordinate coordinate, Piece p) {
-        for (Piece piece : pieces){
-            if (piece.getTeam() != p.getTeam())
-                continue;
-            if (piece.getPosition().equals(coordinate)) {
-                piece.setPosition(p.getPosition());
-                if (piece instanceof Rook)
-                    ((Rook) piece).setCanCastle(false);
-                if (piece instanceof King)
-                    ((King) piece).setCanCastle(false);
+        Coordinate pieceMove = getPieceMove(coordinate, p);
+        if (!pieceMove.getIsCastleMove())
+            return;
+        Piece otherPiece = pieceMove.getPieceInvolvedInCastle();
+        int x = otherPiece.getPosition().getX();
+        if (x == ROOK_ONE_START) {
+            p.setPosition(new Coordinate(KING_CASTLE_ONE_T1.getX(), p.getPosition().getY()));
+            otherPiece.setPosition(new Coordinate(ROOK_CASTLE_ONE_T1.getX(), otherPiece.getPosition().getY()));
+            if (otherPiece instanceof Rook)
+                ((Rook) otherPiece).setFirstMove(false);
+            if (p instanceof  King)
+                ((King) p).setFirstMove(false);
+        } else if (x == ROOK_TWO_START){
+            p.setPosition(new Coordinate(KING_CASTLE_TWO_T1.getX(), p.getPosition().getY()));
+            otherPiece.setPosition(new Coordinate(ROOK_CASTLE_TWO_T1.getX(), otherPiece.getPosition().getY()));
+            if (otherPiece instanceof Rook)
+                ((Rook) otherPiece).setFirstMove(false);
+            if (p instanceof  King)
+                ((King) p).setFirstMove(false);
+        }
+        else {
+            if (p.getPosition().getX() == ROOK_ONE_START){
+                p.setPosition(new Coordinate(ROOK_CASTLE_ONE_T1.getX(), p.getPosition().getY()));
+                otherPiece.setPosition(new Coordinate(KING_CASTLE_ONE_T1.getX(), otherPiece.getPosition().getY()));
+                if (otherPiece instanceof King)
+                    ((King) otherPiece).setFirstMove(false);
+                if (p instanceof  Rook)
+                    ((Rook) p).setFirstMove(false);
+            }else {
+                p.setPosition(new Coordinate(ROOK_CASTLE_TWO_T1.getX(), p.getPosition().getY()));
+                otherPiece.setPosition(new Coordinate(KING_CASTLE_TWO_T1.getX(), otherPiece.getPosition().getY()));
+                if (otherPiece instanceof King)
+                    ((King) otherPiece).setFirstMove(false);
+                if (p instanceof  Rook)
+                    ((Rook) p).setFirstMove(false);
             }
-
         }
     }
+
+    private Coordinate getPieceMove(Coordinate coordinate, Piece p) {
+        ArrayList<Coordinate> moves = p.getMovesDeep(this,false);
+        for (Coordinate m : moves){
+            if (m.positionEquals(coordinate))
+                return m;
+        }
+        return coordinate;
+    }
+
+    public ArrayList<Coordinate> getAllPiecePositions(){
+        ArrayList<Coordinate> positionsList = new ArrayList<>();
+        for (Piece p : pieces){
+            positionsList.add(p.getPosition());
+        }
+        return positionsList;
+    }
+
 }

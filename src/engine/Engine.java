@@ -1,12 +1,15 @@
 package engine;
 
-import engine.pieces.Piece;
+import engine.hardware.pieces.Piece;
+import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
-import engine.ui.Board;
+import engine.hardware.Board;
+import engine.hardware.Coordinate;
 import engine.ui.Renderer;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static engine.helpers.GlobalHelper.*;
@@ -14,6 +17,7 @@ import static engine.helpers.GlobalHelper.*;
 public class Engine implements Runnable {
     JFrame frame;
     Renderer renderer;
+    Scanner scanner;
     Player playerOne;
     Player playerTwo;
     Board board;
@@ -24,6 +28,7 @@ public class Engine implements Runnable {
     // Generic bootstrap code to initialize a swing project.
     // Renderer is where all graphics handling occurs.
     public Engine() {
+        this.scanner = new Scanner(System.in);
         this.renderer = new Renderer(this);
         this.frame = new JFrame("Chessboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,9 +40,9 @@ public class Engine implements Runnable {
 
     // Initialize all game components
     public void initialize() {
-        playerOne = new Human(TEAM_ONE, renderer.getPieceImages(1));
-//        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2));
-        playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(2));
+        playerOne = new Human(TEAM_ONE, renderer.getPieceImages(TEAM_ONE));
+        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2));
+//        playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
         playerTurn = new AtomicInteger(TEAM_ONE);
 
         //========================================================================
@@ -70,34 +75,46 @@ public class Engine implements Runnable {
         }
     }
 
+    String input;
+
     @Override
     public void run(){
         while(running){
-            if (playerTurn.get() == TEAM_ONE){
-                if (playerOne.isAI()) {
-                    renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
-                    renderer.repaint();
-                    switchPlayers();
-                    runPlayerChecks();
-                }
+            if (playerTurn.get() == TEAM_ONE && playerOne.isAI()) {
+                renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
+                renderer.removeCheckFromSelf();
+                refreshGame();
             }
 
             if (board.checkGameStatus() != CONTINUE_GAME)
                 endGame(board.checkGameStatus());
 
-            if (playerTurn.get() == TEAM_TWO) {
-                if (playerTwo.isAI()) {
+            if (playerTurn.get() == TEAM_TWO && playerTwo.isAI()) {
                     renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
-                    renderer.repaint();
-                    switchPlayers();
-                    runPlayerChecks();
-                }
+                    renderer.removeCheckFromSelf();
+                    refreshGame();
             }
 
             if (board.checkGameStatus() != CONTINUE_GAME)
                 endGame(board.checkGameStatus());
 
         }
+    }
+
+    private void printAppDump(Player player) {
+        System.out.println("======= Player " + player.getTeam() + "=======");
+        System.out.println("inCheck: " + player.isInCheck());
+        System.out.println("canMove: " + player.canMove());
+        ArrayList<Coordinate> moves = new ArrayList<>();
+        for(Piece p : player.getPieces()){
+            moves.addAll(p.getMovesDeep(board, true));
+        }
+        System.out.println("available moves: " + moves.size());
+    }
+
+    private void refreshGame() {
+        renderer.repaint();
+        runPlayerChecks();
     }
 
     public void runPlayerChecks() {
