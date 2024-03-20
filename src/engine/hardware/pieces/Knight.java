@@ -22,15 +22,8 @@ public class Knight extends Piece {
     }
 
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
+    ArrayList<Coordinate> addAllPossibleMoves(Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        if (check) {
-            Player player = getPlayer(b);
-            if (!player.isInCheck() && pieceMoveWillResultInCheck(b))
-                return moves;
-            if (player.isInCheck())
-                return getAvailableMovesInCheck(b, moves);
-        }
 
         int x = position.getX();
         int y = position.getY();
@@ -44,15 +37,6 @@ public class Knight extends Piece {
         moves.add(new Coordinate(x - 2, y + 1));
         moves.add(new Coordinate(x - 2, y - 1));
         return moves;
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
     }
 
     @Override

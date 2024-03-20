@@ -26,8 +26,8 @@ public abstract class Player {
         this.pieceImages = pieceImages;
         this.team = team;
         this.isAI = isAI;
-        this.inCheck = true;
-        this.canMove = false;
+        this.inCheck = false;
+        this.canMove = true;
         for(int i = 0; i < 8; i++){
             int PAWN_START = team == TEAM_ONE ? 1 : 6;
             pieces.add(new Pawn(isAI, new Coordinate(i, PAWN_START),  convertToPixelCoordinate(i, PAWN_START), team, pieceImages[PAWN]));
@@ -145,14 +145,14 @@ public abstract class Player {
         return canMove;
     }
 
-    public void runChecks(Board b, boolean check) {
-        inCheck = isKingChecked(b, check);
+    public void runChecks(Board b) {
+        inCheck = isKingChecked(b);
         canMove = canPlayerMove(b);
     }
 
     private boolean canPlayerMove(Board b) {
         for (Piece piece : pieces){
-            if (!piece.getMovesDeep(b,true).isEmpty())
+            if (!piece.getMovesDeep(b).isEmpty())
                 return true;
         }
             return false;
@@ -166,11 +166,11 @@ public abstract class Player {
         this.piecesThatHaveCheck = list;
     }
 
-    private boolean isKingChecked(Board b, Boolean check) {
+    private boolean isKingChecked(Board b) {
         Player otherPlayer = b.getOtherPlayer(team);
         ArrayList<Piece> opposingPieces = otherPlayer.getPieces();
         for (Piece piece : opposingPieces){
-            ArrayList<Coordinate> pieceMoves = piece.getMovesDeep(b,check); //true?
+            ArrayList<Coordinate> pieceMoves = piece.getMovesShallow(b);
             for (Coordinate move : pieceMoves){
                 if (king.getPosition().equals(move)) {
                     this.piecesThatHaveCheck.add(piece);
@@ -179,6 +179,19 @@ public abstract class Player {
         }
         return !piecesThatHaveCheck.isEmpty();
     }
+
+//    @Override
+//    public String toString(){
+//        System.out.println("======= Player " + getTeam() + "=======");
+//        System.out.println("inCheck: " + isInCheck());
+//        System.out.println("canMove: " + canMove());
+//        System.out.println("pieces: " + getPieces().size());
+//        ArrayList<Coordinate> moves = new ArrayList<>();
+//        for(Piece p : getPieces()){
+//            moves.addAll(p.getMovesDeep(, true));
+//        }
+//        System.out.println("available moves: " + moves.size());
+//    }
 
     public abstract Player copy();
 }

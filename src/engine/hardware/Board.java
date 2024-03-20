@@ -147,7 +147,7 @@ public class Board {
     }
 
     private Coordinate getPieceMove(Coordinate coordinate, Piece p) {
-        ArrayList<Coordinate> moves = p.getMovesDeep(this,false);
+        ArrayList<Coordinate> moves = p.getMovesDeep(this);
         for (Coordinate m : moves){
             if (m.positionEquals(coordinate))
                 return m;
@@ -162,5 +162,4 @@ public class Board {
         }
         return positionsList;
     }
-
 }

@@ -47,20 +47,11 @@ public class King extends Piece {
     }
 
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
+    ArrayList<Coordinate> addAllPossibleMoves(Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-
-        if (check) {
-            Player player = getPlayer(b);
-            if (!player.isInCheck() && pieceMoveWillResultInCheck(b))
-                return moves;
-            if (player.isInCheck())
-                return getAvailableMovesInCheck(b, moves);
-        }
 
         int x = position.getX();
         int y = position.getY();
-
         moves.add(new Coordinate(x-1, y-1));
         moves.add(new Coordinate(x, y-1));
         moves.add(new Coordinate(x+1, y-1));
@@ -70,21 +61,6 @@ public class King extends Piece {
         moves.add(new Coordinate(x, y+1));
         moves.add(new Coordinate(x+1, y+1));
         return moves;
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-        BoardSimulator sim = new BoardSimulator(b);
-        List<Coordinate> copyList = List.copyOf(possibleMoves);
-        for(Coordinate move : copyList){
-            if (sim.kingIsMovingIntoCheck(move, this))
-                possibleMoves.remove(move);
-            sim.reset();
-        }
     }
 
     public void setFirstMove(boolean bool){

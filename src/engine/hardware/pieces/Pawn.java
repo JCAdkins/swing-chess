@@ -28,17 +28,8 @@ public class Pawn extends Piece {
     }
 
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
+    ArrayList<Coordinate> addAllPossibleMoves(Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        if (check) {
-            Player player = getPlayer(b);
-            if (!player.isInCheck() && pieceMoveWillResultInCheck(b))
-                return moves;
-            if (player.isInCheck()) {
-                moves = getAvailableMovesInCheck(b, moves);
-                return moves;
-            }
-        }
         boolean isValid = true, isDoubleValid = true, addTopLeft = false, addTopRight = false;
         int x = position.getX();
         int y = position.getY();
@@ -62,15 +53,6 @@ public class Pawn extends Piece {
         if (isFirstMove && isValid && isDoubleValid)
             moves.add(new Coordinate(x, y + 2 * getTeam()));
         return moves;
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
     }
 
     @Override

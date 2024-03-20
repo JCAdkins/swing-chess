@@ -42,7 +42,7 @@ public abstract class Piece {
     }
 
     public boolean canMove(Board b) {
-        return !getMovesDeep(b,true).isEmpty();
+        return !getMovesDeep(b).isEmpty();
     }
 
     public Coordinate getPosition() {
@@ -70,68 +70,48 @@ public abstract class Piece {
         return sprite;
     }
 
-    public ArrayList<Coordinate> getMovesDeep(Board b, boolean check) {
-        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b, check);
+    /**
+     * @param b The current board you want to pull moves from for the piece. This method gets the moves
+     *          and removes all those that are illegal. I.e., moving the piece will put the king in check
+     *
+     * @return Returns a full list of legal moves
+     */
+    public ArrayList<Coordinate> getMovesDeep(Board b) {
+        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b);
         addCastles(possibleMoves, b);
-        removeIllegalMoves(possibleMoves, b);
+        removeIllegalMoves(possibleMoves, b, true);
         return possibleMoves;
     }
 
-//    public ArrayList<Coordinate> getMovesShallow(Board b) {
-//        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b, false);
-//        addCastles(possibleMoves, b);
-//        return possibleMoves;
-//    }
+    /**
+     * This method is ONLY to be used by methods invoked by getMovesDeep to avoid stack overflow
+     * error from recursive calls. Using this for any other reasons will result in issues.
+     *
+     * @param b The current board you want to pull moves from for the piece. This method gets the moves
+     *          and removes some of those that are illegal.
+     *
+     * @return Returns a list of legal and illegal moves
+     */
+    public ArrayList<Coordinate> getMovesShallow(Board b) {
+        ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b);
+        addCastles(possibleMoves, b);
+        removeIllegalMoves(possibleMoves, b, false);
+        return possibleMoves;
+    }
 
     public abstract Piece copy();
 
     public void addCastles(ArrayList<Coordinate> possibleMoves, Board b) {
-        // Nothing, will be overridden when needed
+        // Nothing, will be overridden by King and Rook classes
     }
 
-    abstract ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check);
+    abstract ArrayList<Coordinate> addAllPossibleMoves(Board b);
 
-    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b){
+    void removeIllegalMoves(ArrayList<Coordinate> possibleMoves, Board b, boolean removeAllOthers){
         removeOffBoardMoves(possibleMoves, b);
         removeAllMovesOnSelf(possibleMoves, b);
-        removeAllOtherMoves(possibleMoves, b);
-    }
-
-    public ArrayList<Coordinate> getAvailableMovesInCheck(Board b, ArrayList<Coordinate> movesList) {
-        Player player = b.getPlayer(getTeam());
-        ArrayList<Piece> piecesThatHaveCheck = player.getPiecesThatHaveCheck();
-
-        if (removeCheckAndPieceCannotMove(b, piecesThatHaveCheck))
-            return movesList;
-        else
-            return getMovesInCheckHelper(b, movesList);
-    }
-
-    public boolean removeCheckAndPieceCannotMove(Board b, ArrayList<Piece> piecesThatHaveCheck){
-        BoardSimulator sim = new BoardSimulator(b);
-        sim.removePieces(piecesThatHaveCheck);
-        sim.runPlayerCheck(getTeam());
-        return sim.movingThePieceWillResultInCheck(this);
-
-    }
-
-    private ArrayList<Coordinate> getMovesInCheckHelper(Board b, ArrayList<Coordinate> movesList){
-        BoardSimulator sim = new BoardSimulator(b);
-        for(Coordinate move : this.getMovesDeep(b, false)){
-            if (!sim.isInCheckAfterMove(move, this))
-                movesList.add(move);
-            sim.reset();
-        }
-        return movesList;
-    }
-
-    public boolean pieceMoveWillResultInCheck(Board b) {
-        BoardSimulator sim = new BoardSimulator(b);
-        return sim.movingThePieceWillResultInCheck(this);
-    }
-
-    public Player getPlayer(Board b){
-        return team == TEAM_ONE ? b.getPlayerOne() : b.getPlayerTwo();
+        if (removeAllOthers)
+            removeAllOtherMoves(possibleMoves, b);
     }
 
     private void removeOffBoardMoves(ArrayList<Coordinate> possibleMoves, Board b) {
@@ -151,7 +131,18 @@ public abstract class Piece {
         }
     }
 
-    abstract void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b);
+    public void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b){
+        BoardSimulator sim = new BoardSimulator(b);
+        List<Coordinate> copyList = List.copyOf(possibleMoves);
+        for (Coordinate move : copyList){
+            if (move.getIsCastleMove()){
+
+            }
+            if (sim.isInCheckAfterMove(move, this))
+                possibleMoves.remove(move);
+            sim.reset();
+        }
+    }
 
     @Override
     public boolean equals(Object obj) {

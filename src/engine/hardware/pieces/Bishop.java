@@ -3,8 +3,12 @@ package engine.hardware.pieces;
 import engine.player.Player;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
+import engine.simulate.BoardSimulator;
+
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static engine.helpers.MovesHelper.addDiagonalMoves;
 
@@ -25,27 +29,10 @@ public class Bishop extends Piece {
     }
 
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
+    ArrayList<Coordinate> addAllPossibleMoves(Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        if (check) {
-            Player player = getPlayer(b);
-            if (!player.isInCheck() && pieceMoveWillResultInCheck(b))
-                return moves;
-            if (player.isInCheck())
-                return getAvailableMovesInCheck(b, moves);
-        }
         addDiagonalMoves(moves, position, getTeam(), b); // This is different per piece
-
         return moves;
-    }
-
-    /**
-     * @param possibleMoves we
-     * @param b w4e
-     */
-    @Override
-    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
     }
 
     @Override

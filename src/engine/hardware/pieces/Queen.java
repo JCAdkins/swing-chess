@@ -25,27 +25,11 @@ public class Queen extends Piece {
     }
 
     @Override
-    ArrayList<Coordinate> addAllPossibleMoves(Board b, boolean check) {
+    ArrayList<Coordinate> addAllPossibleMoves(Board b) {
         ArrayList<Coordinate> moves = new ArrayList<>();
-        if (check) {
-            Player player = getPlayer(b);
-            if (!player.isInCheck() && pieceMoveWillResultInCheck(b))
-                return moves;
-            if (player.isInCheck())
-                return getAvailableMovesInCheck(b, moves);
-        }
         addDiagonalMoves(moves, position, getTeam(),  b);
         addHorizontalAndVerticalMoves(moves, position, getTeam(), b);
         return moves;
-    }
-
-    /**
-     * @param possibleMoves
-     * @param b
-     */
-    @Override
-    void removeAllOtherMoves(ArrayList<Coordinate> possibleMoves, Board b) {
-
     }
 
     @Override

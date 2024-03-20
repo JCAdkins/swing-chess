@@ -1,6 +1,7 @@
 package engine;
 
 import engine.hardware.pieces.Piece;
+import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
 import engine.hardware.Board;
@@ -50,7 +51,7 @@ public class Engine implements Runnable {
     // Initialize all game components
     public void initialize() {
         playerOne = new Human(TEAM_ONE, renderer.getPieceImages(TEAM_ONE));
-//        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(2));
+//        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
         playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
         playerTurn = new AtomicInteger(TEAM_ONE);
 
@@ -87,7 +88,7 @@ public class Engine implements Runnable {
     @Override
     public void run(){
         while(running){
-            if (playerTurn.get() == TEAM_ONE && playerOne.isAI()) {
+            if (playerTurn.get() == TEAM_ONE && playerOne.isAI() && playerOne.canMove()) {
                 renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
                 renderer.removeCheckFromSelf();
                 refreshGame();
@@ -96,7 +97,7 @@ public class Engine implements Runnable {
             if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
                 endGame(board.checkGameStatus(playerTurn.get()));
 
-            if (playerTurn.get() == TEAM_TWO && playerTwo.isAI()) {
+            if (playerTurn.get() == TEAM_TWO && playerTwo.isAI() && playerTwo.canMove()) {
                     renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
                     renderer.removeCheckFromSelf();
                     refreshGame();
@@ -113,8 +114,8 @@ public class Engine implements Runnable {
     }
 
     public void runPlayerChecks() {
-        playerOne.runChecks(board, true);
-        playerTwo.runChecks(board, true);
+        playerOne.runChecks(board);
+        playerTwo.runChecks(board);
     }
 
     public void switchPlayers(){

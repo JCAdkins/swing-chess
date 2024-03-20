@@ -178,7 +178,7 @@ public class Renderer extends JPanel implements KeyListener {
     }
 
     private boolean isLegalMove(Coordinate coordinate) {
-        ArrayList<Coordinate> moves = movingPiece.getMovesDeep(b, true);
+        ArrayList<Coordinate> moves = movingPiece.getMovesDeep(b);
         for (Coordinate m : moves){
             if (m.positionEquals(coordinate)) {
                 return true;
@@ -247,7 +247,7 @@ public class Renderer extends JPanel implements KeyListener {
             Stroke oldStroke = g2d.getStroke();
             g2d.setStroke(new BasicStroke(thickness));
             g2d.setColor(Color.YELLOW);
-            ArrayList<Coordinate> movesList = movingPiece.getMovesDeep(b,true);
+            ArrayList<Coordinate> movesList = movingPiece.getMovesDeep(b);
             for(Coordinate move : movesList){
                 Coordinate drawPosition = movingPiece.getDrawPosition();
                 if (move.positionEquals(new Coordinate(convertToColumn(drawPosition.getX() + SQUARE_SIZE / 2), convertToRow(drawPosition.getY() + SQUARE_SIZE / 2)))) {
@@ -352,7 +352,7 @@ public class Renderer extends JPanel implements KeyListener {
         System.out.println("pieces: " + player.getPieces().size());
         ArrayList<Coordinate> moves = new ArrayList<>();
         for(Piece p : player.getPieces()){
-            moves.addAll(p.getMovesDeep(b, true));
+            moves.addAll(p.getMovesDeep(b));
         }
         System.out.println("available moves: " + moves.size());
     }
