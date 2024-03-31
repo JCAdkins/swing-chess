@@ -1,6 +1,5 @@
 package engine.hardware.pieces;
 
-import engine.player.Player;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
 import java.awt.*;
@@ -20,6 +19,12 @@ public class Rook extends Piece {
 
     public Rook(Piece piece) {
         super(piece);
+        this.king = ((Rook) piece).getKing();
+        this.firstMove = ((Rook) piece).getFirstMove();
+    }
+
+    private boolean getFirstMove() {
+        return this.firstMove;
     }
 
     @Override
@@ -36,6 +41,9 @@ public class Rook extends Piece {
 
     public void addKing(King king){
         this.king = king;
+    }
+    public King getKing(){
+        return this.king;
     }
 
     public boolean canCastle(Board b){
@@ -62,13 +70,8 @@ public class Rook extends Piece {
             castlePosition = this.position.getX() == ROOK_ONE_START ? ROOK_CASTLE_ONE_T2 : ROOK_CASTLE_TWO_T2;
         }
         boolean castlePositionOpen = !b.getAllPiecePositions().contains(castlePosition);
-        if (this.position.getX() == ROOK_ONE_START) {
-            if (firstMove && castlePositionOpen && king.canCastle(this, b))
-                moves.add(new Coordinate(castlePosition, true, king));
-        }else {
-            if (firstMove && castlePositionOpen && king.canCastle(this, b))
-                moves.add(new Coordinate(castlePosition, true, king));
-        }
+        if (firstMove && castlePositionOpen && king.canCastle(this, b))
+            moves.add(new Coordinate(castlePosition, true, king));
     }
 
     public void setFirstMove(boolean bool){

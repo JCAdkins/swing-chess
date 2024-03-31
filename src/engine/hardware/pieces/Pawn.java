@@ -16,6 +16,7 @@ public class Pawn extends Piece {
 
     public Pawn(Piece piece) {
         super(piece);
+        this.isFirstMove = ((Pawn) piece).isFirstMove;
     }
 
     @Override
@@ -34,14 +35,14 @@ public class Pawn extends Piece {
         int x = position.getX();
         int y = position.getY();
 
-        for (Piece piece : b.getPieces()){
-            if (piece.getPosition().equals(new Coordinate(x, y + getTeam())))
+        for (Piece piece : b.getOtherPlayer(getTeam()).getPieces()){
+            if (piece.getPosition().positionEquals(new Coordinate(x, y + getTeam())))
                 isValid = false;
-            if (piece.getPosition().equals(new Coordinate(x, y + 2 * getTeam())))
+            if (piece.getPosition().positionEquals(new Coordinate(x, y + 2 * getTeam())))
                 isDoubleValid = false;
-            if (piece.getPosition().equals(new Coordinate(x + 1, y + getTeam())))
+            if (piece.getPosition().positionEquals(new Coordinate(x + 1, y + getTeam())))
                 addTopRight = true;
-            if (piece.getPosition().equals(new Coordinate(x - 1, y + getTeam())))
+            if (piece.getPosition().positionEquals(new Coordinate(x - 1, y + getTeam())))
                 addTopLeft = true;
         }
         if (isValid)

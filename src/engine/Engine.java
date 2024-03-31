@@ -1,6 +1,5 @@
 package engine;
 
-import engine.hardware.pieces.Piece;
 import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
@@ -9,7 +8,8 @@ import engine.ui.components.EndGamePanel;
 import engine.ui.Renderer;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static engine.helpers.GlobalHelper.*;
@@ -50,18 +50,14 @@ public class Engine implements Runnable {
 
     // Initialize all game components
     public void initialize() {
-        playerOne = new Human(TEAM_ONE, renderer.getPieceImages(TEAM_ONE));
-//        playerTwo = new AI(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
-        playerTwo = new Human(TEAM_TWO, renderer.getPieceImages(TEAM_TWO));
+        Image[] playerOneSprites = renderer.getPieceImages(TEAM_ONE);
+        Image[] playerTwoSprites = renderer.getPieceImages(TEAM_TWO);
+//        playerOne = new Human(TEAM_ONE, playerOneSprites);
+        playerOne = new AI(TEAM_ONE, playerOneSprites);
+        playerTwo = new AI(TEAM_TWO, playerTwoSprites);
+//        playerTwo = new Human(TEAM_TWO, playerTwoSprites);
         playerTurn = new AtomicInteger(TEAM_ONE);
-
-        //========================================================================
-        ArrayList<Piece> gamePieces = new ArrayList<>(playerOne.getPieces());
-        gamePieces.addAll(playerTwo.getPieces());
-        //========================================================================
-
-        board = new Board(gamePieces, renderer, playerOne, playerTwo);
-
+        board = new Board(renderer, playerOne, playerTwo);
     }
 
     // When start is called on a thread it auto-invokes a Runnable's run() method.
@@ -87,30 +83,32 @@ public class Engine implements Runnable {
 
     @Override
     public void run(){
-        while(running){
-            if (playerTurn.get() == TEAM_ONE && playerOne.isAI() && playerOne.canMove()) {
-                renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
-                renderer.removeCheckFromSelf();
-                refreshGame();
-            }
+        while(running) {
+                if (playerTurn.get() == TEAM_ONE && playerOne.isAI() && playerOne.canMove()) {
+                    renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
+                    renderer.removeCheckFromSelf();
+                    refreshGame();
+                }
 
-            if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
-                endGame(board.checkGameStatus(playerTurn.get()));
+                if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
+                    endGame(board.checkGameStatus(playerTurn.get()));
 
-            if (playerTurn.get() == TEAM_TWO && playerTwo.isAI() && playerTwo.canMove()) {
+                if (playerTurn.get() == TEAM_TWO && playerTwo.isAI() && playerTwo.canMove()) {
                     renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
                     renderer.removeCheckFromSelf();
                     refreshGame();
-            }
+                }
 
-            if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
-                endGame(board.checkGameStatus(playerTurn.get()));
+                if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
+                    endGame(board.checkGameStatus(playerTurn.get()));
+
         }
     }
 
     private void refreshGame() {
-        renderer.repaint();
         runPlayerChecks();
+        renderer.repaint();
+
     }
 
     public void runPlayerChecks() {
@@ -147,14 +145,19 @@ public class Engine implements Runnable {
 
     public void replayGame() {
         renderer.reset();
-        initialize();
+        this.initialize();
         endGamePanel.setVisible(false);
     }
 
     public void changeSettings() {
+        endGamePanel.setVisible(false);
     }
 
     public void quit() {
         System.exit(0);
+    }
+
+    public void hideEndGameDisplay() {
+        endGamePanel.setVisible(false);
     }
 }

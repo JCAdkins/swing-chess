@@ -1,17 +1,23 @@
 package engine.hardware;
 
+import engine.hardware.pieces.Pawn;
 import engine.hardware.pieces.Piece;
+import java.awt.image.BufferedImage;
+
+import static engine.helpers.GlobalHelper.OFF_BOARD;
 
 // No longer a coordinate class, more like a class representing a move
 public class Coordinate {
     private int x;
     private int y;
     private boolean isCastleMove = false;
-    private Piece pieceInvolvedInCastle;
+    private final Piece pieceInvolvedInCastle;
 
     public Coordinate(int x, int y) {
         this.x = x;
         this.y = y;
+        this.isCastleMove = false;
+        this.pieceInvolvedInCastle = new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
     }
 
     public Coordinate(Coordinate c, boolean bool, Piece piece){
@@ -25,6 +31,7 @@ public class Coordinate {
         this.x = x;
         this.y = y;
         this.isCastleMove = bool;
+        this.pieceInvolvedInCastle = new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
     }
 
     public int getX() {
@@ -71,12 +78,12 @@ public class Coordinate {
         Coordinate otherCoordinate = (Coordinate) o;
 
         // Check if the x and y coordinates are equal
-        return x == otherCoordinate.x && y == otherCoordinate.y && isCastleMove == otherCoordinate.isCastleMove;
+        return x == otherCoordinate.x && y == otherCoordinate.y && isCastleMove == otherCoordinate.isCastleMove ;
     }
 
     @Override
     public String toString() {
-        return "(" + x + ", " + y + ")";
+        return "(" + x + ", " + y + ")" + "\nisCastleMove: " + isCastleMove + "\npieceInvolvedInCastleMove: " + pieceInvolvedInCastle;
     }
 
 }

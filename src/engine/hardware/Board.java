@@ -4,6 +4,7 @@ import engine.hardware.pieces.*;
 import engine.player.Player;
 import engine.ui.Renderer;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import static engine.helpers.GlobalHelper.*;
 
@@ -12,22 +13,21 @@ public class Board {
     private final Player playerOne;
     private final Player playerTwo;
 
-    public Board(ArrayList<Piece> pieces, Renderer renderer, Player playerOne, Player playerTwo) {
-        this.pieces = pieces;
+    public Board( Renderer renderer, Player playerOne, Player playerTwo) {
+        this.pieces = new ArrayList<>();
         this.playerOne = playerOne;
         this.playerTwo = playerTwo;
-        renderer.setPieces(pieces);
+        this.pieces.addAll(playerOne.getPieces());
+        this.pieces.addAll(playerTwo.getPieces());
         renderer.setBoard(this);
     }
 
     public Board(Board original) {
         this.pieces = new ArrayList<>();
-        for (Piece piece : original.pieces) {
-            this.pieces.add(piece.copy()); // Assuming each Piece subclass implements a copy method
-        }
-
         this.playerOne = original.playerOne.copy(); // Assuming Player subclasses implement a copy method
         this.playerTwo = original.playerTwo.copy(); // Assuming Player subclasses implement a copy method
+        this.pieces.addAll(playerOne.getPieces());
+        this.pieces.addAll(playerTwo.getPieces());
     }
 
     public int checkGameStatus(int playerTurn) {
@@ -50,10 +50,6 @@ public class Board {
         return null;
     }
 
-    private boolean playersCanMove() {
-        return playerOne.canMove() || playerTwo.canMove();
-    }
-
     public void addPiece(Piece newPiece){
         pieces.add(newPiece);
     }
@@ -61,10 +57,8 @@ public class Board {
     public void removePiece(Piece deadPiece) {
 
         pieces.remove(deadPiece);
-        if (deadPiece.getTeam() == TEAM_ONE)
-            playerOne.removePiece(deadPiece);
-        else
-            playerTwo.removePiece(deadPiece);
+            deadPiece.remove();
+
     }
 
     public ArrayList<Piece> getPieces() {
@@ -106,8 +100,8 @@ public class Board {
         return playerOne.getTeam() == team ? playerOne : playerTwo;
     }
 
-    public void performCastle(Coordinate coordinate, Piece p) {
-        Coordinate pieceMove = getPieceMove(coordinate, p);
+    public void performCastle(Coordinate pieceMove, Piece p) {
+
         if (!pieceMove.getIsCastleMove())
             return;
         Piece otherPiece = pieceMove.getPieceInvolvedInCastle();
@@ -131,23 +125,19 @@ public class Board {
             if (p.getPosition().getX() == ROOK_ONE_START){
                 p.setPosition(new Coordinate(ROOK_CASTLE_ONE_T1.getX(), p.getPosition().getY()));
                 otherPiece.setPosition(new Coordinate(KING_CASTLE_ONE_T1.getX(), otherPiece.getPosition().getY()));
-                if (otherPiece instanceof King)
-                    ((King) otherPiece).setFirstMove(false);
-                if (p instanceof  Rook)
-                    ((Rook) p).setFirstMove(false);
             }else {
                 p.setPosition(new Coordinate(ROOK_CASTLE_TWO_T1.getX(), p.getPosition().getY()));
                 otherPiece.setPosition(new Coordinate(KING_CASTLE_TWO_T1.getX(), otherPiece.getPosition().getY()));
-                if (otherPiece instanceof King)
-                    ((King) otherPiece).setFirstMove(false);
-                if (p instanceof  Rook)
-                    ((Rook) p).setFirstMove(false);
             }
+            if (otherPiece instanceof King)
+                ((King) otherPiece).setFirstMove(false);
+            if (p instanceof  Rook)
+                ((Rook) p).setFirstMove(false);
         }
     }
 
-    private Coordinate getPieceMove(Coordinate coordinate, Piece p) {
-        ArrayList<Coordinate> moves = p.getMovesDeep(this);
+    public Coordinate getPieceMove(Coordinate coordinate, Piece p) {
+        ArrayList<Coordinate> moves = p.getMovesShallow(this);
         for (Coordinate m : moves){
             if (m.positionEquals(coordinate))
                 return m;
@@ -161,5 +151,13 @@ public class Board {
             positionsList.add(p.getPosition());
         }
         return positionsList;
+    }
+
+    public Piece getPieceByPosition(Coordinate coordinate, int team) {
+        for (Piece p : pieces) {
+            if (p.getPosition().positionEquals(coordinate) && p.getTeam() == team)
+                return p;
+        }
+        return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
     }
 }

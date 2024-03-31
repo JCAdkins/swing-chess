@@ -1,6 +1,5 @@
 package engine.hardware.pieces;
 
-import engine.player.Player;
 import engine.simulate.BoardSimulator;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
@@ -77,6 +76,8 @@ public abstract class Piece {
      * @return Returns a full list of legal moves
      */
     public ArrayList<Coordinate> getMovesDeep(Board b) {
+        if (!this.isAlive)
+            return new ArrayList<>();
         ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b);
         addCastles(possibleMoves, b);
         removeIllegalMoves(possibleMoves, b, true);
@@ -93,6 +94,8 @@ public abstract class Piece {
      * @return Returns a list of legal and illegal moves
      */
     public ArrayList<Coordinate> getMovesShallow(Board b) {
+        if (!this.isAlive)
+            return new ArrayList<>();
         ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b);
         addCastles(possibleMoves, b);
         removeIllegalMoves(possibleMoves, b, false);
@@ -135,9 +138,6 @@ public abstract class Piece {
         BoardSimulator sim = new BoardSimulator(b);
         List<Coordinate> copyList = List.copyOf(possibleMoves);
         for (Coordinate move : copyList){
-            if (move.getIsCastleMove()){
-
-            }
             if (sim.isInCheckAfterMove(move, this))
                 possibleMoves.remove(move);
             sim.reset();
@@ -163,6 +163,8 @@ public abstract class Piece {
 
     public void remove() {
         this.isAlive = false;
+        this.position = OFF_BOARD;
+        this.drawPosition = OFF_BOARD;
     }
 
 }

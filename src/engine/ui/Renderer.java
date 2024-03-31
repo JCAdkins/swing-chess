@@ -6,17 +6,14 @@ import engine.hardware.Coordinate;
 import engine.hardware.pieces.*;
 import engine.player.Player;
 import engine.simulate.Move;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import static engine.helpers.GlobalHelper.*;
 
@@ -24,7 +21,6 @@ public class Renderer extends JPanel implements KeyListener {
     private Image[] pieceImagesT1 = new BufferedImage[TEAM_SIZE];
     private Image[] pieceImagesT2 = new BufferedImage[TEAM_SIZE];
     private final ImageIcon boardImage;
-    private final ArrayList<Piece> pieces = new ArrayList<>();
     Piece movingPiece;
     Engine engine;
     Coordinate previousPosition;
@@ -140,16 +136,15 @@ public class Renderer extends JPanel implements KeyListener {
 
     private void removePiece(Coordinate coordinate){
         Piece pieceToRemove = null;
-        for (Piece piece : pieces) {
-            if (piece.getPosition().equals(coordinate) && movingPiece.getTeam() != piece.getTeam()) {
+        for (Piece piece : b.getPieces()) {
+            if (piece.getPosition().positionEquals(coordinate) && movingPiece.getTeam() != piece.getTeam()) {
                 pieceToRemove = piece;
                 break;
             }
         }
-        if (pieceToRemove != null) {
+        if (pieceToRemove != null)
             b.removePiece(pieceToRemove);
-            pieces.remove(pieceToRemove);
-        }
+
     }
 
     private void movePiece(Coordinate to) {
@@ -158,7 +153,8 @@ public class Renderer extends JPanel implements KeyListener {
     }
 
     private void performCastle(Coordinate coordinate) {
-        b.performCastle(coordinate, movingPiece);
+        Coordinate pieceMove = b.getPieceMove(coordinate, movingPiece);
+        b.performCastle(pieceMove, movingPiece);
     }
 
     // This method is called to remove the double jump from pawns after they've been moved and
@@ -262,14 +258,12 @@ public class Renderer extends JPanel implements KeyListener {
             }
             g2d.setStroke(oldStroke);
         }
-        // Draw pieces
-        List<Piece> piecesCopy;
-        synchronized (pieces) {
-            piecesCopy = new ArrayList<>(pieces);
+        if (b !=null) {
+            for (Piece piece : b.getPieces()) {
+                drawPiece(g, piece);
+            }
         }
-        for (Piece piece : piecesCopy) {
-            drawPiece(g, piece);
-        }
+
     }
 
     private void highlightKingIfCheck(Graphics g) {
@@ -313,17 +307,8 @@ public class Renderer extends JPanel implements KeyListener {
         }
     }
 
-    public void setPieces(ArrayList<Piece> list) {
-        this.pieces.addAll(list);
-    }
-
     private Piece getPiece(Coordinate coordinate) {
-        List<Piece> pieces1 = pieces.stream().filter(piece -> piece.getPosition().positionEquals(coordinate)).toList();
-        if (pieces1.isEmpty())
-            return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
-        if (pieces1.getFirst().getTeam() != engine.getPlayerTurn())
-            return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
-        return pieces1.getFirst();
+        return b.getPieceByPosition(coordinate, engine.getPlayerTurn());
     }
 
     @Override
@@ -333,6 +318,10 @@ public class Renderer extends JPanel implements KeyListener {
         if (keyCode == KeyEvent.VK_P) {
            printAppDump(b.getPlayer(engine.getPlayerTurn()));
         }
+        if (keyCode == KeyEvent.VK_H) {
+            engine.hideEndGameDisplay();
+        }
+
     }
 
     @Override
@@ -358,7 +347,6 @@ public class Renderer extends JPanel implements KeyListener {
     }
 
     public void reset() {
-        pieces.clear(); // Clear the list of pieces
         movingPiece = null; // Reset the currently moving piece
         previousPosition = null; // Reset the previous position
         canPaintMoves = false; // Reset the flag for painting move highlights

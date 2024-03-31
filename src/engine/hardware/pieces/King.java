@@ -1,18 +1,15 @@
 package engine.hardware.pieces;
 
-import engine.player.Player;
-import engine.simulate.BoardSimulator;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 import static engine.helpers.GlobalHelper.*;
 
 public class King extends Piece {
     private boolean firstMove;
-    private boolean inCheck;
+    private final boolean inCheck;
     Rook rookOne;
     Rook rookTwo;
 
@@ -24,6 +21,14 @@ public class King extends Piece {
         this.rookTwo = rookTwo;
     }
 
+    public King(King king) {
+        super(king);
+        this.inCheck = king.inCheck;
+        this.firstMove = king.firstMove;
+        this.rookOne = king.rookOne;
+        this.rookTwo = king.rookTwo;
+    }
+
     public Rook getRookOne() {
         return rookOne;
     }
@@ -32,18 +37,9 @@ public class King extends Piece {
         return rookTwo;
     }
 
-    public King(Piece piece) {
-        super(piece);
-        this.inCheck = false;
-        this.firstMove = ((King) piece).getFirstMove();
-        this.rookOne = new Rook(((King) piece).rookOne);
-        this.rookTwo = new Rook(((King) piece).rookTwo);
-
-    }
-
     @Override
     public Piece copy() {
-        return new King(this); // Assuming Bishop has a copy constructor
+        return new King(this);
     }
 
     @Override
@@ -98,10 +94,6 @@ public class King extends Piece {
         return "King " + getTeam() + ": " + getPosition();
     }
 
-    public void setInCheck(boolean inCheck) {
-        this.inCheck = inCheck;
-    }
-
     public boolean getInCheck(){
         return inCheck;
     }
@@ -111,13 +103,11 @@ public class King extends Piece {
         boolean castlePositionOpen;
         if (rook.equals(rookOne)) {
             castlePosition = getTeam() == TEAM_ONE ? KING_CASTLE_ONE_T1 : KING_CASTLE_ONE_T2;
-            castlePositionOpen = !b.getAllPiecePositions().contains(castlePosition);
-            return isAlive() && firstMove && castlePositionOpen;
         }else{
             castlePosition = getTeam() == TEAM_ONE ? KING_CASTLE_TWO_T1 : KING_CASTLE_TWO_T2;
-            castlePositionOpen = !b.getAllPiecePositions().contains(castlePosition);
-            return isAlive() && firstMove && castlePositionOpen;
         }
+        castlePositionOpen = !b.getAllPiecePositions().contains(castlePosition);
+        return firstMove && castlePositionOpen;
     }
 
     @Override
@@ -129,14 +119,23 @@ public class King extends Piece {
             return false; // Different classes or null reference
         }
         Piece other = (Piece) obj; // Typecast to Person
+
         return isAI() == other.isAI()
-                && position.equals(other.position)
-                && drawPosition.equals(other.drawPosition)
+                && position.positionEquals(other.position)
+                && drawPosition.positionEquals(other.drawPosition)
                 && getTeam() == other.getTeam()
                 && getSprite().equals(other.getSprite())
                 && rookOne.equals(((King) other).getRookOne())
                 && rookTwo.equals(((King) other).getRookTwo())
                 && firstMove == ((King) other).getFirstMove()
                 && inCheck == ((King) other).getInCheck();
+    }
+
+    public void setRookTwo(Rook rookTwo) {
+        this.rookTwo = rookTwo;
+    }
+
+    public void setRookOne(Rook rookOne) {
+        this.rookOne = rookOne;
     }
 }

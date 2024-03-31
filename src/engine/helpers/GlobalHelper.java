@@ -1,6 +1,9 @@
 package engine.helpers;
 
 import engine.hardware.Coordinate;
+import engine.hardware.pieces.King;
+import engine.hardware.pieces.Rook;
+import java.awt.image.BufferedImage;
 
 public class GlobalHelper
 {
@@ -56,6 +59,8 @@ public class GlobalHelper
     public static final int ROOK_TWO_START = 7;
     //==============================================
 
+    @org.jetbrains.annotations.NotNull
+    @org.jetbrains.annotations.Contract("_, _ -> new")
     public static Coordinate convertToPixelCoordinate(int pieceStartX, int pieceStartY){
         return new Coordinate(convertToPixelX(pieceStartX, BASE_WIDTH), convertToPixelY(pieceStartY, BASE_HEIGHT));
     }
