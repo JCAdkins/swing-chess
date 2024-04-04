@@ -86,4 +86,7 @@ public class Coordinate {
         return "(" + x + ", " + y + ")" + "\nisCastleMove: " + isCastleMove + "\npieceInvolvedInCastleMove: " + pieceInvolvedInCastle;
     }
 
+    public boolean isOnBoard() {
+        return x >= 0 && x <= 7 && y >= 0 && y <= 7;
+    }
 }

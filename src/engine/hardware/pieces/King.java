@@ -78,7 +78,6 @@ public class King extends Piece {
         return firstMove && castlePositionOpen && rookTwo.canCastle(b);
     }
 
-    @Override
     public void addCastles(ArrayList<Coordinate> moves, Board b){
         Coordinate castleOnePosition = getTeam() == TEAM_ONE ? KING_CASTLE_ONE_T1 : KING_CASTLE_ONE_T2;
         Coordinate castleTwoPosition = getTeam() == TEAM_ONE ? KING_CASTLE_TWO_T1 : KING_CASTLE_TWO_T2;
@@ -137,5 +136,9 @@ public class King extends Piece {
 
     public void setRookOne(Rook rookOne) {
         this.rookOne = rookOne;
+    }
+
+    public boolean isFirstMove() {
+        return firstMove;
     }
 }

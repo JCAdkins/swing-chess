@@ -4,7 +4,6 @@ import engine.hardware.pieces.*;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -28,8 +27,8 @@ public abstract class Player {
         this.isAI = isAI;
         this.inCheck = false;
         this.canMove = true;
-        int PIECE_START = team == TEAM_ONE ? 0 : 7;
-        int PAWN_START = team == TEAM_ONE ? 1 : 6;
+        int PIECE_START = team == TEAM_ONE ? PIECE_START_TEAM_1 : PIECE_START_TEAM_2;
+        int PAWN_START = team == TEAM_ONE ? PAWN_START_TEAM_1 : PAWN_START_TEAM_2;
         for(int i = 0; i < 8; i++){
             Pawn pawn = new Pawn(isAI, new Coordinate(i, PAWN_START),  convertToPixelCoordinate(i, PAWN_START), team, pieceImages[PAWN]);
             pieces.add(pawn);
@@ -59,13 +58,25 @@ public abstract class Player {
             if (p instanceof Rook)
                 if (rookOne == null)
                     rookOne = (Rook) p;
-                else
+                else if (rookTwo == null)
                     rookTwo = (Rook) p;
         }
+        King king = null;
         for (Piece p : pieces){
             if (p instanceof King){
-                ((King) p).setRookOne(rookOne);
-                ((King) p).setRookTwo(rookTwo);
+                if (((King) p).getRookOne().getPosition().isOnBoard())
+                    ((King) p).setRookOne(rookOne);
+                if (((King) p).getRookTwo().getPosition().isOnBoard())
+                    ((King) p).setRookTwo(rookTwo);
+
+                king = (King) p;
+                break;
+            }
+        }
+        for (Piece p : pieces){
+            if (p instanceof Rook){
+                ((Rook) p).setKing(king);
+                break;
             }
         }
         this.pieceImages = Arrays.copyOf(player.getPieceImages(), player.getPieceImages().length);
@@ -77,6 +88,13 @@ public abstract class Player {
 
     public ArrayList<Piece> getPieces() {
         return pieces;
+    }
+
+    public Piece convertPawn(Pawn pawn, Class<? extends Piece> c, Image img){
+        Piece newPiece = pawn.convertToNewPiece(c, img);
+        pieces.remove(pawn);
+        pieces.add(newPiece);
+        return newPiece;
     }
 
     public void setPieces(ArrayList<Piece> pieces) {
@@ -99,26 +117,11 @@ public abstract class Player {
         this.inCheck = inCheck;
     }
 
-    public void addPiece(Piece pieceToAdd) {
-        this.pieces.add(pieceToAdd);
-    }
-
-    public void removePiece(Piece pieceToRemove) {
-        this.pieces.remove(pieceToRemove);
-        pieceToRemove.remove();
-    }
-
     public King getKing(){
         for (Piece p : pieces){
             if (p instanceof King)
                 return (King) p;
         }
-//
-//         Rook GENERIC_ROOK = new Rook(false, OFF_BOARD, OFF_BOARD, 0,
-//            new BufferedImage(0,0,0));
-//
-//        return new King(false, OFF_BOARD, OFF_BOARD, 0,
-//                new BufferedImage(0,0,0), GENERIC_ROOK, GENERIC_ROOK);
         return null;
     }
 
@@ -145,10 +148,6 @@ public abstract class Player {
             return false;
     }
 
-    public ArrayList<Piece> getPiecesThatHaveCheck() {
-        return piecesThatHaveCheck;
-    }
-
     public void setPiecesThatHaveCheck(ArrayList<Piece> list){
         this.piecesThatHaveCheck = list;
     }
@@ -169,4 +168,8 @@ public abstract class Player {
     }
 
     public abstract Player copy();
+
+    public void addPiece(Piece newPiece) {
+        pieces.add(newPiece);
+    }
 }

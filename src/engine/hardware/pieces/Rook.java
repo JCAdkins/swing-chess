@@ -17,6 +17,11 @@ public class Rook extends Piece {
         this.firstMove = true;
     }
 
+    public Rook(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite, boolean firstMove) {
+        super(isAI, position, drawPosition, team, sprite);
+        this.firstMove = firstMove;
+    }
+
     public Rook(Piece piece) {
         super(piece);
         this.king = ((Rook) piece).getKing();
@@ -59,10 +64,22 @@ public class Rook extends Piece {
         return isAlive() && firstMove && castlePositionOpen;
     }
 
-    @Override
+    public boolean isFirstMove() {
+        return firstMove;
+    }
+
+    public void setKing(King king) {
+        this.king = king;
+    }
+
     public void addCastles(ArrayList<Coordinate> moves, Board b){
+        if (!firstMove)
+            return;
+
         Coordinate castlePosition;
         King king = b.getPlayer(getTeam()).getKing();
+        if (king == null || !king.isFirstMove())
+            return;
 
         if (this.getTeam() == TEAM_ONE){
             castlePosition = this.position.getX() == ROOK_ONE_START ? ROOK_CASTLE_ONE_T1 : ROOK_CASTLE_TWO_T1;

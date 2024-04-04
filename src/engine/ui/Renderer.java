@@ -4,6 +4,7 @@ import engine.Engine;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
 import engine.hardware.pieces.*;
+import engine.player.AI;
 import engine.player.Player;
 import engine.simulate.Move;
 import javax.imageio.ImageIO;
@@ -14,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static engine.helpers.GlobalHelper.*;
 
@@ -79,6 +81,7 @@ public class Renderer extends JPanel implements KeyListener {
                     Coordinate coordinate = new Coordinate(col, row);
                     if (isLegalMove(coordinate)) {
                         performMove(coordinate);
+                        upgradePawn();
                         removeCheckFromSelf();
                         checkAndSetCheck();
                         switchPlayers();
@@ -288,9 +291,60 @@ public class Renderer extends JPanel implements KeyListener {
             Coordinate to = move.getLast();
             movingPiece = getPiece(from);
             performMove(to);
+            upgradePawn();
             repaint();
             engine.switchPlayers();
         }
+    }
+
+    private void upgradePawn() {
+        if (movingPiece.getClass() != Pawn.class)
+            return;
+
+        // We have to invert start position here since pawns will be on opposite side of board
+        int rowPos = movingPiece.getTeam() == TEAM_ONE ? PIECE_START_TEAM_2 : PIECE_START_TEAM_1;
+
+        if (movingPiece.getPosition().getY() != rowPos)
+            return;
+
+        if (movingPiece.isAI()){
+            Random r = new Random();
+            Class<? extends Piece> cl;
+            Image sprite;
+            int i = r.nextInt(4);
+            switch (i) {
+                case 0 : {
+                    cl = Bishop.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[BISHOP] : pieceImagesT2[BISHOP];
+                    break;
+                }
+                case 1 : {
+                    cl = Knight.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[KNIGHT] : pieceImagesT2[KNIGHT];
+                    break;
+                }
+                case 2 : {
+                    cl = Queen.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[QUEEN] : pieceImagesT2[QUEEN];
+                    break;
+                }
+                default: {
+                    cl = Rook.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[ROOK] : pieceImagesT2[ROOK];
+                }
+            }
+            setUpgradedPawn(cl, sprite);
+            return;
+        }
+
+        engine.setUpgradePawnPanelIcons(b.getPlayer(movingPiece.getTeam()).getPieceImages());
+        engine.setUpgradePawnPanelVisible(true);
+    }
+
+    public void setUpgradedPawn(Class<? extends Piece> cl, Image image){
+        Player player = b.getPlayer(movingPiece.getTeam());
+        b.convertPawn(player, (Pawn) movingPiece, cl, image);
+        repaint();
     }
 
     private void drawPiece(Graphics g, Piece piece) {
@@ -320,6 +374,14 @@ public class Renderer extends JPanel implements KeyListener {
         }
         if (keyCode == KeyEvent.VK_H) {
             engine.hideEndGameDisplay();
+        }
+        if (keyCode == KeyEvent.VK_N){
+            ArrayList<Piece> pieces =  b.getPlayer(engine.getPlayerTurn()).getPieces();
+            ArrayList<Coordinate> moves = new ArrayList<>();
+            for (Piece p : pieces){
+                moves.addAll(p.getMovesDeep(b));
+            }
+            System.out.println(moves);
         }
 
     }

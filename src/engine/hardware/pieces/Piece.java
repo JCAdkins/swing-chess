@@ -79,7 +79,7 @@ public abstract class Piece {
         if (!this.isAlive)
             return new ArrayList<>();
         ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b);
-        addCastles(possibleMoves, b);
+        addCastleMoves(possibleMoves, b);
         removeIllegalMoves(possibleMoves, b, true);
         return possibleMoves;
     }
@@ -97,15 +97,20 @@ public abstract class Piece {
         if (!this.isAlive)
             return new ArrayList<>();
         ArrayList<Coordinate> possibleMoves = addAllPossibleMoves(b);
-        addCastles(possibleMoves, b);
+        addCastleMoves(possibleMoves, b);
         removeIllegalMoves(possibleMoves, b, false);
         return possibleMoves;
     }
 
     public abstract Piece copy();
 
-    public void addCastles(ArrayList<Coordinate> possibleMoves, Board b) {
-        // Nothing, will be overridden by King and Rook classes
+    public void addCastleMoves(ArrayList<Coordinate> possibleMoves, Board b){
+        if (this instanceof Rook)
+//            if (((Rook) this).isFirstMove())
+                ((Rook) this).addCastles(possibleMoves, b);
+        if (this instanceof King)
+//            if (((King) this).isFirstMove())
+                ((King) this).addCastles(possibleMoves, b);
     }
 
     abstract ArrayList<Coordinate> addAllPossibleMoves(Board b);

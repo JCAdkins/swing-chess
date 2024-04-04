@@ -4,6 +4,7 @@ import engine.hardware.pieces.*;
 import engine.player.Player;
 import engine.ui.Renderer;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import static engine.helpers.GlobalHelper.*;
@@ -48,10 +49,6 @@ public class Board {
                 return p;
         }
         return null;
-    }
-
-    public void addPiece(Piece newPiece){
-        pieces.add(newPiece);
     }
 
     public void removePiece(Piece deadPiece) {
@@ -159,5 +156,16 @@ public class Board {
                 return p;
         }
         return new Pawn(false, OFF_BOARD, OFF_BOARD, 0, new BufferedImage(1,1,1));
+    }
+
+    public void convertPawn(Player player, Pawn movingPiece, Class<? extends Piece> cl, Image image) {
+        Piece newPiece = player.convertPawn(movingPiece, cl, image);
+        removePiece(movingPiece);
+        addPiece(player, newPiece);
+    }
+
+    private void addPiece(Player p, Piece newPiece) {
+        p.addPiece(newPiece);
+        pieces.add(newPiece);
     }
 }

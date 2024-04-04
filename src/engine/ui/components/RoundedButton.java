@@ -4,13 +4,32 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 
-class RoundedButton extends JButton {
+public class RoundedButton extends JButton {
 
     public RoundedButton(String text) {
         super(text);
         setContentAreaFilled(false); // Make button transparent
         setOpaque(false); // Make button transparent
-        setForeground(Color.BLUE); // White text color
+        setForeground(Color.BLUE); // Blue text color
+        setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16)); // Custom font and size
+
+        // Create rounded border with padding
+        Border border = BorderFactory.createEmptyBorder(10, 20, 10, 20);
+
+        setBorder(BorderFactory.createCompoundBorder(
+                border, // Compound border
+                new RoundedBorder(20)) // Rounded border
+        );
+
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, getPreferredSize().height));
+        setHorizontalAlignment(SwingConstants.CENTER);
+    }
+
+    public RoundedButton(Icon icon) {
+        super(icon);
+        setContentAreaFilled(true); // Make button transparent
+        setOpaque(false); // Make button transparent
+        setForeground(Color.BLUE); // Blue text color
         setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16)); // Custom font and size
 
         // Create rounded border with padding

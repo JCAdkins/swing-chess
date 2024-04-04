@@ -46,4 +46,6 @@ public class AI extends Player{
     public Player copy() {
         return new AI(this);
     }
+
+
 }

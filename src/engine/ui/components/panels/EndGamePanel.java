@@ -1,6 +1,8 @@
-package engine.ui.components;
+package engine.ui.components.panels;
 
 import engine.Engine;
+import engine.ui.components.RoundedButton;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;

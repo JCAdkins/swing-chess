@@ -49,6 +49,10 @@ public class GlobalHelper
 
     //==============================================
     //          Piece board starts
+    public static final int PIECE_START_TEAM_1 = 0;
+    public static final int PIECE_START_TEAM_2 = 7;
+    public static final int PAWN_START_TEAM_1 = 1;
+    public static final int PAWN_START_TEAM_2 = 6;
     public static final int ROOK_ONE_START = 0;
     public static final int KNIGHT_ONE_START = 1;
     public static final int BISHOP_ONE_START = 2;

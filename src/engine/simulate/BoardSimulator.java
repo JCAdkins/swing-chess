@@ -1,6 +1,5 @@
 package engine.simulate;
 
-import engine.hardware.pieces.King;
 import engine.hardware.pieces.Piece;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
@@ -36,8 +35,8 @@ public class BoardSimulator {
 
         ArrayList<Piece> opposingPieces = simBoard.getOtherPlayer(movingPiece.getTeam()).getPieces();
         // If move will jump piece we need to remove that piece from the board
-        opposingPieces.removeIf(piece -> piece.getPosition().positionEquals(move));
-        simBoard.getPieces().removeIf(piece -> piece.getTeam() != movingPiece.getTeam() && piece.getPosition().positionEquals(move));
+        opposingPieces.removeIf(piece ->  piece.getPosition().positionEquals(move));
+        simBoard.getPieces().removeIf(piece ->  piece.getTeam() != movingPiece.getTeam() && piece.getPosition().positionEquals(move));
         Coordinate kingPosition = simBoard.getPlayer(movingPiece.getTeam()).getKing().getPosition();
 
         return piecesMovesContainsKing(opposingPieces, kingPosition);
@@ -45,7 +44,6 @@ public class BoardSimulator {
 
     private boolean piecesMovesContainsKing(ArrayList<Piece> opposingPieces, Coordinate kingPosition){
         for (Piece p : opposingPieces){
-            ArrayList<Coordinate> moves = p.getMovesShallow(simBoard);
             for (Coordinate move : p.getMovesShallow(simBoard)){
                 if (move.positionEquals(kingPosition))
                     return true;
