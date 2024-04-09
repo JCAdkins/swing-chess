@@ -99,5 +99,13 @@ public class Rook extends Piece {
     public String toString(){
         return "Rook " + getTeam() + ": " + getPosition();
     }
+
+    /**
+     * @return
+     */
+    @Override
+    public char toLetter() {
+        return getTeam() == TEAM_ONE ? 'R' :'r';
+    }
 }
 

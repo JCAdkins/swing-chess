@@ -168,4 +168,8 @@ public class Board {
         p.addPiece(newPiece);
         pieces.add(newPiece);
     }
+
+    public int getPlayerTurn() {
+        return getPlayerOne().isPlayerTurn() ? TEAM_ONE : TEAM_TWO;
+    }
 }

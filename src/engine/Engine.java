@@ -1,21 +1,23 @@
 package engine;
 
+import engine.hardware.Coordinate;
 import engine.hardware.pieces.Piece;
 import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
 import engine.hardware.Board;
+import engine.stockfish.FenGenerator;
 import engine.stockfish.StockFishAI;
 import engine.ui.components.panels.EndGamePanel;
 import engine.ui.Renderer;
 import engine.ui.components.panels.UpgradePawnPanel;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.Scanner;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static engine.helpers.GlobalHelper.*;
+import static java.util.function.Function.identity;
 
 public class Engine implements Runnable {
     JFrame frame;
@@ -28,15 +30,15 @@ public class Engine implements Runnable {
     private boolean running;
     private volatile AtomicInteger playerTurn;
     private Thread thread;
-//    private final Scanner s;
-    private StockFishAI stockFishAI;
+    private final StockFishAI stockFishAI;
+    private final FenGenerator fenGenerator;
 
 
     // Generic bootstrap code to initialize a swing project.
     // Renderer is where all graphics handling occurs.
     public Engine() {
-//        this.s = new Scanner(System.in);
         this.stockFishAI = new StockFishAI();
+        this.fenGenerator = new FenGenerator();
         this.renderer = new Renderer(this);
         this.frame = new JFrame("Chessboard");
         this.endGamePanel = new EndGamePanel(this);
@@ -65,11 +67,13 @@ public class Engine implements Runnable {
     public void initialize() {
         Image[] playerOneSprites = renderer.getPieceImages(TEAM_ONE);
         Image[] playerTwoSprites = renderer.getPieceImages(TEAM_TWO);
-//        playerOne = new Human(TEAM_ONE, playerOneSprites);
-        playerOne = new AI(TEAM_ONE, playerOneSprites);
+        playerOne = new Human(TEAM_ONE, playerOneSprites);
+//        playerOne = new AI(TEAM_ONE, playerOneSprites);
         playerTwo = new AI(TEAM_TWO, playerTwoSprites);
 //        playerTwo = new Human(TEAM_TWO, playerTwoSprites);
         playerTurn = new AtomicInteger(TEAM_ONE);
+        playerOne.setPlayerTurn(true);
+        playerTwo.setPlayerTurn(false);
         board = new Board(renderer, playerOne, playerTwo);
     }
 
@@ -96,42 +100,69 @@ public class Engine implements Runnable {
 
     @Override
     public void run(){
-//        String string = "";
-        boolean t = true;
+        try {
+            stockFishAI.sendCommand("uci", identity(), (s) -> s.startsWith("uciok"), 2000L);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
         while(running) {
-            simpleAI();
+//            simpleAI();
+            stockFishAI();
         }
     }
 
     // This AI method was very simplistic and was intended to be used only for app development.
     // Post app development Stockfish is to be used to generate AI moves.
     private void simpleAI() {
-//        if (s.hasNext())
-//                string = s.next();
-//
-//            if (string.equals("m") && playerTurn.get() == TEAM_ONE) {
-//                string = "";
             if (playerTurn.get() == TEAM_ONE && playerOne.isAI() && playerOne.canMove()) {
                 renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
                 renderer.removeCheckFromSelf();
                 refreshGame();
             }
-//            }
 
         if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
             endGame(board.checkGameStatus(playerTurn.get()));
 
-//                if (string.equals("m") && playerTurn.get() == TEAM_TWO) {
-//                    string = "";
         if (playerTurn.get() == TEAM_TWO && playerTwo.isAI() && playerTwo.canMove()) {
             renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
             renderer.removeCheckFromSelf();
             refreshGame();
-//                    }
         }
 
         if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
             endGame(board.checkGameStatus(playerTurn.get()));
+    }
+
+    private void stockFishAI(){
+        if (playerOne.isPlayerTurn() && playerOne.isAI() && playerOne.canMove()) {
+            renderer.performAiMove(playerOne.generateStockFishMove(stockFishAIMove()));
+            renderer.removeCheckFromSelf();
+            refreshGame();
+        }
+
+        if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
+            endGame(board.checkGameStatus(playerTurn.get()));
+
+        if (playerTwo.isPlayerTurn() && playerTwo.isAI() && playerTwo.canMove()) {
+            ArrayList<Coordinate> move = playerTwo.generateStockFishMove(stockFishAIMove());
+            renderer.performAiMove(move);
+            renderer.removeCheckFromSelf();
+            refreshGame();
+        }
+
+        if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
+            endGame(board.checkGameStatus(playerTurn.get()));
+    }
+    private String stockFishAIMove(){
+        try {
+
+            ArrayList<String> list = (ArrayList<String>) stockFishAI.sendCommand("position fen " + fenGenerator.generate(board), identity(), s -> s.startsWith("readyok"), 2000L);
+            System.out.println(list);
+
+            return stockFishAI.sendCommand("go movetime 3000", lines -> lines.stream().filter(s->s.startsWith("bestmove")).findFirst().get(), (line) -> line.startsWith("bestmove"), 5000L).split(" ")[1];
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void refreshGame() {
@@ -147,6 +178,13 @@ public class Engine implements Runnable {
 
     public void switchPlayers(){
         playerTurn.set(playerTurn.get() * SWITCH_TEAM);
+        if (playerTurn.get() == TEAM_ONE) {
+            playerOne.setPlayerTurn(true);
+            playerTwo.setPlayerTurn(false);
+        } else {
+            playerOne.setPlayerTurn(false);
+            playerTwo.setPlayerTurn(true);
+        }
     }
 
     public int getPlayerTurn(){

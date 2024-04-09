@@ -6,6 +6,8 @@ import engine.hardware.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static engine.helpers.GlobalHelper.TEAM_ONE;
+
 public class Knight extends Piece {
 
     public Knight(boolean isAI, Coordinate position, Coordinate drawPosition, int team, Image sprite) {
@@ -42,5 +44,13 @@ public class Knight extends Piece {
     @Override
     public String toString(){
         return "Knight " + getTeam() + ": " + getPosition();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public char toLetter() {
+        return getTeam() == TEAM_ONE ? 'N' :'n';
     }
 }

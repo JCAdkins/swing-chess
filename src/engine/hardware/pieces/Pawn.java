@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import static engine.helpers.GlobalHelper.SWITCH_TEAM;
+import static engine.helpers.GlobalHelper.TEAM_ONE;
 
 public class Pawn extends Piece {
     private boolean isFirstMove;
@@ -77,5 +78,13 @@ public class Pawn extends Piece {
     @Override
     public String toString(){
         return "Pawn " + getTeam() + ": " + getPosition();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public char toLetter() {
+        return getTeam() == TEAM_ONE ? 'P' :'p';
     }
 }

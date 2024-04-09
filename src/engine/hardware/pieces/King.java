@@ -141,4 +141,12 @@ public class King extends Piece {
     public boolean isFirstMove() {
         return firstMove;
     }
+
+    /**
+     * @return
+     */
+    @Override
+    public char toLetter() {
+        return getTeam() == TEAM_ONE ? 'K' :'k';
+    }
 }

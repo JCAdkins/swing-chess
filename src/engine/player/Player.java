@@ -16,7 +16,7 @@ public abstract class Player {
     ArrayList<Piece> piecesThatHaveCheck;
     private final int team;
     private final boolean isAI;
-    private boolean inCheck, canMove;
+    private boolean inCheck, canMove, isPlayerTurn;
     private final Image[] pieceImages;
 
     public Player(int team, Image[] pieceImages, boolean isAI) {
@@ -171,5 +171,26 @@ public abstract class Player {
 
     public void addPiece(Piece newPiece) {
         pieces.add(newPiece);
+    }
+
+    public boolean isPlayerTurn() {
+        return isPlayerTurn;
+    }
+
+    public void setPlayerTurn(boolean playerTurn) {
+        isPlayerTurn = playerTurn;
+    }
+
+    public ArrayList<Coordinate> generateStockFishMove(String bestMove) {
+        int fromX = (int) bestMove.charAt(0) - ASCII_OFFSET;
+        int fromY = Character.getNumericValue(bestMove.charAt(1)) - FEN_OFFSET;
+        int toX = (int) bestMove.charAt(2) - ASCII_OFFSET;
+        int toY = Character.getNumericValue(bestMove.charAt(3)) - FEN_OFFSET;
+        Coordinate from = new Coordinate(fromX, fromY);
+        Coordinate to = new Coordinate(toX,toY);
+        ArrayList<Coordinate> retList = new ArrayList<>();
+        retList.add(from);
+        retList.add(to);
+        return retList;
     }
 }

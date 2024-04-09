@@ -172,5 +172,6 @@ public abstract class Piece {
         this.drawPosition = OFF_BOARD;
     }
 
+    public abstract char toLetter();
 }
 

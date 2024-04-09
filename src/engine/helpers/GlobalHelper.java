@@ -48,6 +48,13 @@ public class GlobalHelper
     //==============================================
 
     //==============================================
+    //          FEN Coordinate Helpers
+
+    public static final int ASCII_OFFSET = 97;
+    public static final int FEN_OFFSET = 1;
+    //==============================================
+
+    //==============================================
     //          Piece board starts
     public static final int PIECE_START_TEAM_1 = 0;
     public static final int PIECE_START_TEAM_2 = 7;

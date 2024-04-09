@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static engine.helpers.GlobalHelper.TEAM_ONE;
 import static engine.helpers.MovesHelper.addDiagonalMoves;
 
 public class Bishop extends Piece {
@@ -33,6 +34,14 @@ public class Bishop extends Piece {
         ArrayList<Coordinate> moves = new ArrayList<>();
         addDiagonalMoves(moves, position, getTeam(), b); // This is different per piece
         return moves;
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public char toLetter() {
+        return getTeam() == TEAM_ONE ? 'B' :'b';
     }
 
     @Override

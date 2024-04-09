@@ -6,6 +6,7 @@ import engine.hardware.Coordinate;
 import java.awt.*;
 import java.util.ArrayList;
 
+import static engine.helpers.GlobalHelper.TEAM_ONE;
 import static engine.helpers.MovesHelper.addDiagonalMoves;
 import static engine.helpers.MovesHelper.addHorizontalAndVerticalMoves;
 
@@ -35,5 +36,13 @@ public class Queen extends Piece {
     @Override
     public String toString(){
         return "Queen " + getTeam() + ": " + getPosition();
+    }
+
+    /**
+     * @return
+     */
+    @Override
+    public char toLetter() {
+        return getTeam() == TEAM_ONE ? 'Q' :'q';
     }
 }
