@@ -25,10 +25,11 @@ public class StockFishAI {
             // Start Stock fish process
             stockfishProcess = new ProcessBuilder("stockfish").start();
 
+
             // Get input and output streams
             reader = new BufferedReader(new InputStreamReader(stockfishProcess.getInputStream()));
             writer = new OutputStreamWriter(stockfishProcess.getOutputStream());
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -63,12 +64,13 @@ public class StockFishAI {
                     }
                 }
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
             return commandProcessor.apply(output);
         });
 
-        return command.get(timeout, TimeUnit.MILLISECONDS);
+        return command.get();
+//        return command.get(timeout, TimeUnit.MILLISECONDS);
     }
 
     public void close() {

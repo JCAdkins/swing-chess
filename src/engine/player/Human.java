@@ -21,7 +21,7 @@ public class Human extends Player{
      *
      */
     @Override
-    public ArrayList<Coordinate> generateMove(ArrayList<Piece> pieces, Board b) {
+    public ArrayList<Coordinate> generateSimpleAiMove(ArrayList<Piece> pieces, Board b) {
         // Humans will make move through GUI no need to programmatically generate a move.
         return new ArrayList<>();
     }

@@ -129,7 +129,7 @@ public abstract class Player {
         return isAI;
     }
 
-    public abstract ArrayList<Coordinate> generateMove(ArrayList<Piece> pieces, Board b);
+    public abstract ArrayList<Coordinate> generateSimpleAiMove(ArrayList<Piece> pieces, Board b);
 
     public boolean canMove() {
         return canMove;

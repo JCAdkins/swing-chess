@@ -5,19 +5,21 @@ import engine.hardware.pieces.Piece;
 
 import java.util.Arrays;
 
-import static engine.helpers.GlobalHelper.OFF_BOARD;
-import static engine.helpers.GlobalHelper.TEAM_ONE;
+import static engine.helpers.GlobalHelper.*;
 
 public class FenGenerator {
     private final char[][] charBoard;
 
     private void setBoard(Board board) {
+        for(int row = 0; row < 8; row++){
+            Arrays.fill(this.charBoard[row], ' ');
+        }
         for(Piece p: board.getPieces()){
             if (p.getPosition().positionEquals(OFF_BOARD))
                 continue;
             else {
                 int x = p.getPosition().getX();
-                int y = p.getPosition().getY();
+                int y = ROWS - p.getPosition().getY() - FEN_OFFSET;
                 this.charBoard[y][x] = p.toLetter();
             }
         }
@@ -25,9 +27,6 @@ public class FenGenerator {
 
     public FenGenerator() {
         this.charBoard = new char[8][8];
-        for(int row = 0; row < 8; row++){
-            Arrays.fill(this.charBoard[row], ' ');
-        }
     }
 
     public String generate(Board board){

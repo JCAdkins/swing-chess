@@ -3,25 +3,35 @@ package engine.player;
 import engine.hardware.pieces.Piece;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
+import engine.stockfish.AiDifficulty;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class AI extends Player{
-    public AI(int team, Image[] pieceImages) {
+
+    private final AiDifficulty aiDifficulty;
+
+    public AI(int team, Image[] pieceImages, AiDifficulty aiDifficulty) {
         super(team, pieceImages, true);
+        this.aiDifficulty = aiDifficulty;
     }
 
     public AI(Player player) {
         super(player);
+        this.aiDifficulty = ((AI) player).aiDifficulty;
+    }
+
+    public AiDifficulty getAiDifficulty() {
+        return aiDifficulty;
     }
 
     /**
      *
      */
     @Override
-    public ArrayList<Coordinate> generateMove(ArrayList<Piece> pieces, Board b) {
+    public ArrayList<Coordinate> generateSimpleAiMove(ArrayList<Piece> pieces, Board b) {
         ArrayList<Piece> pieces1 = new ArrayList<>();
         for(Piece piece : pieces){
             if (piece.canMove(b))
@@ -48,4 +58,7 @@ public class AI extends Player{
     }
 
 
+    public AiDifficulty getDifficulty() {
+        return aiDifficulty;
+    }
 }

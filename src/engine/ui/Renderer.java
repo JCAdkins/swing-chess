@@ -4,7 +4,6 @@ import engine.Engine;
 import engine.hardware.Board;
 import engine.hardware.Coordinate;
 import engine.hardware.pieces.*;
-import engine.player.AI;
 import engine.player.Player;
 import engine.simulate.Move;
 import javax.imageio.ImageIO;
@@ -297,6 +296,18 @@ public class Renderer extends JPanel implements KeyListener {
         }
     }
 
+    public void performAiMove(ArrayList<Coordinate> move, String piece){
+        if (!move.isEmpty()) {
+            Coordinate from = move.getFirst();
+            Coordinate to = move.getLast();
+            movingPiece = getPiece(from);
+            performMove(to);
+            upgradePawn(piece);
+            repaint();
+            engine.switchPlayers();
+        }
+    }
+
     private void upgradePawn() {
         if (movingPiece.getClass() != Pawn.class)
             return;
@@ -324,6 +335,48 @@ public class Renderer extends JPanel implements KeyListener {
                     break;
                 }
                 case 2 : {
+                    cl = Queen.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[QUEEN] : pieceImagesT2[QUEEN];
+                    break;
+                }
+                default: {
+                    cl = Rook.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[ROOK] : pieceImagesT2[ROOK];
+                }
+            }
+            setUpgradedPawn(cl, sprite);
+            return;
+        }
+
+        engine.setUpgradePawnPanelIcons(b.getPlayer(movingPiece.getTeam()).getPieceImages());
+        engine.setUpgradePawnPanelVisible(true);
+    }
+
+    private void upgradePawn(String piece) {
+        if (movingPiece.getClass() != Pawn.class)
+            return;
+
+        // We have to invert start position here since pawns will be on opposite side of board
+        int rowPos = movingPiece.getTeam() == TEAM_ONE ? PIECE_START_TEAM_2 : PIECE_START_TEAM_1;
+
+        if (movingPiece.getPosition().getY() != rowPos)
+            return;
+
+        if (movingPiece.isAI()){
+            Image sprite;
+            Class<? extends Piece> cl;
+            switch (piece.toLowerCase()) {
+                case "b" : {
+                    cl = Bishop.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[BISHOP] : pieceImagesT2[BISHOP];
+                    break;
+                }
+                case "n" : {
+                    cl = Knight.class;
+                    sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[KNIGHT] : pieceImagesT2[KNIGHT];
+                    break;
+                }
+                case "q" : {
                     cl = Queen.class;
                     sprite = movingPiece.getTeam() == TEAM_ONE ? pieceImagesT1[QUEEN] : pieceImagesT2[QUEEN];
                     break;
@@ -400,7 +453,6 @@ public class Renderer extends JPanel implements KeyListener {
         System.out.println("======= Player " + player.getTeam() + "=======");
         System.out.println("inCheck: " + player.isInCheck());
         System.out.println("canMove: " + player.canMove());
-        System.out.println("pieces: " + player.getPieces().size());
         ArrayList<Coordinate> moves = new ArrayList<>();
         for(Piece p : player.getPieces()){
             moves.addAll(p.getMovesDeep(b));

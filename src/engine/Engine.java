@@ -6,15 +6,19 @@ import engine.player.AI;
 import engine.player.Human;
 import engine.player.Player;
 import engine.hardware.Board;
+import engine.stockfish.AiDifficulty;
 import engine.stockfish.FenGenerator;
 import engine.stockfish.StockFishAI;
 import engine.ui.components.panels.EndGamePanel;
 import engine.ui.Renderer;
 import engine.ui.components.panels.UpgradePawnPanel;
+import org.jetbrains.annotations.NotNull;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static engine.helpers.GlobalHelper.*;
 import static java.util.function.Function.identity;
@@ -68,8 +72,8 @@ public class Engine implements Runnable {
         Image[] playerOneSprites = renderer.getPieceImages(TEAM_ONE);
         Image[] playerTwoSprites = renderer.getPieceImages(TEAM_TWO);
         playerOne = new Human(TEAM_ONE, playerOneSprites);
-//        playerOne = new AI(TEAM_ONE, playerOneSprites);
-        playerTwo = new AI(TEAM_TWO, playerTwoSprites);
+//        playerOne = new AI(TEAM_ONE, playerOneSprites, new AiDifficulty(2000, 4));
+        playerTwo = new AI(TEAM_TWO, playerTwoSprites, new AiDifficulty(1000, 3));
 //        playerTwo = new Human(TEAM_TWO, playerTwoSprites);
         playerTurn = new AtomicInteger(TEAM_ONE);
         playerOne.setPlayerTurn(true);
@@ -115,7 +119,7 @@ public class Engine implements Runnable {
     // Post app development Stockfish is to be used to generate AI moves.
     private void simpleAI() {
             if (playerTurn.get() == TEAM_ONE && playerOne.isAI() && playerOne.canMove()) {
-                renderer.performAiMove(playerOne.generateMove(board.getT1Pieces(), board));
+                renderer.performAiMove(playerOne.generateSimpleAiMove(board.getT1Pieces(), board));
                 renderer.removeCheckFromSelf();
                 refreshGame();
             }
@@ -124,7 +128,7 @@ public class Engine implements Runnable {
             endGame(board.checkGameStatus(playerTurn.get()));
 
         if (playerTurn.get() == TEAM_TWO && playerTwo.isAI() && playerTwo.canMove()) {
-            renderer.performAiMove(playerTwo.generateMove(board.getT2Pieces(), board));
+            renderer.performAiMove(playerTwo.generateSimpleAiMove(board.getT2Pieces(), board));
             renderer.removeCheckFromSelf();
             refreshGame();
         }
@@ -135,34 +139,48 @@ public class Engine implements Runnable {
 
     private void stockFishAI(){
         if (playerOne.isPlayerTurn() && playerOne.isAI() && playerOne.canMove()) {
-            renderer.performAiMove(playerOne.generateStockFishMove(stockFishAIMove()));
-            renderer.removeCheckFromSelf();
-            refreshGame();
+            stockFishMoveHelper(((AI) playerOne).getAiDifficulty());
         }
 
         if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
             endGame(board.checkGameStatus(playerTurn.get()));
 
         if (playerTwo.isPlayerTurn() && playerTwo.isAI() && playerTwo.canMove()) {
-            ArrayList<Coordinate> move = playerTwo.generateStockFishMove(stockFishAIMove());
-            renderer.performAiMove(move);
-            renderer.removeCheckFromSelf();
-            refreshGame();
+            stockFishMoveHelper(((AI) playerTwo).getAiDifficulty());
         }
 
         if (board.checkGameStatus(playerTurn.get()) != CONTINUE_GAME)
             endGame(board.checkGameStatus(playerTurn.get()));
     }
-    private String stockFishAIMove(){
+    private String stockFishAIMove(AiDifficulty aiDifficulty){
         try {
-
             ArrayList<String> list = (ArrayList<String>) stockFishAI.sendCommand("position fen " + fenGenerator.generate(board), identity(), s -> s.startsWith("readyok"), 2000L);
             System.out.println(list);
-
-            return stockFishAI.sendCommand("go movetime 3000", lines -> lines.stream().filter(s->s.startsWith("bestmove")).findFirst().get(), (line) -> line.startsWith("bestmove"), 5000L).split(" ")[1];
+            return stockFishAI.sendCommand("go movetime " + aiDifficulty.getTimeLimitMillis() + " depth " + aiDifficulty.getDepth(), getBestmove(), (line) -> line.startsWith("bestmove"), 5000L).split(" ")[1];
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void stockFishMoveHelper(AiDifficulty aiDifficulty){
+        String bestMove = stockFishAIMove(aiDifficulty);
+        ArrayList<Coordinate> move;
+        if (bestMove.length() == 4) {
+            move = playerOne.generateStockFishMove(bestMove);
+            renderer.performAiMove(move);
+        } else {
+            String piece = bestMove.substring(4);
+            bestMove = bestMove.substring(0,4);
+            move = playerOne.generateStockFishMove(bestMove);
+            renderer.performAiMove(move, piece);
+        }
+        renderer.removeCheckFromSelf();
+        refreshGame();
+    }
+
+    @NotNull
+    private static Function<List<String>, String> getBestmove() {
+        return lines -> lines.stream().filter(s -> s.startsWith("bestmove")).findFirst().orElse("rerun rerun");
     }
 
     private void refreshGame() {
