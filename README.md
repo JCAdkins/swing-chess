@@ -7,7 +7,7 @@ To Play:
 
 Stockfish Chess engine is needed for true AI implementation. 
 To install Stockfish please visit: https://stockfishchess.org/download/.
--  If you run MacOS use 'homebrew install stockfish' and you should be able to leave it as is. If you run Linux use 'sudo apt-get install stockfish' and leave as is. 
+-  If you run MacOS use 'homebrew install stockfish' and if you run Linux use 'sudo apt-get install stockfish' and leave source code as is.
 - If you run Windows, put the full or relative path to the engine in StockFishAI.java on line 26: stockfishProcess = new ProcessBuilder("/path/to/engine.exe").start();
 
 
