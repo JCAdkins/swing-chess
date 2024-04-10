@@ -52,10 +52,8 @@ public class Board {
     }
 
     public void removePiece(Piece deadPiece) {
-
         pieces.remove(deadPiece);
             deadPiece.remove();
-
     }
 
     public ArrayList<Piece> getPieces() {

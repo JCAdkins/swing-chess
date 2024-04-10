@@ -72,7 +72,7 @@ public class Engine implements Runnable {
         Image[] playerOneSprites = renderer.getPieceImages(TEAM_ONE);
         Image[] playerTwoSprites = renderer.getPieceImages(TEAM_TWO);
         playerOne = new Human(TEAM_ONE, playerOneSprites);
-//        playerOne = new AI(TEAM_ONE, playerOneSprites, new AiDifficulty(2000, 4));
+//        playerOne = new AI(TEAM_ONE, playerOneSprites, new AiDifficulty(1500, 20));
         playerTwo = new AI(TEAM_TWO, playerTwoSprites, new AiDifficulty(1000, 3));
 //        playerTwo = new Human(TEAM_TWO, playerTwoSprites);
         playerTurn = new AtomicInteger(TEAM_ONE);

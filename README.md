@@ -5,7 +5,11 @@ A game of chess created with the Java Swing library.
 
 To Play:
 
-Stockfish Chess engine is needed for true AI implementation. To install Stockfish please visit: https://stockfishchess.org/download/. Put the path to the engine in class StockFishAI.java on line 26: stockfishProcess = new ProcessBuilder("/Path to engine/").start(); If you have a Mac and use homebrew you should be able to leave it as is.
+Stockfish Chess engine is needed for true AI implementation. 
+To install Stockfish please visit: https://stockfishchess.org/download/.
+-  If you run MacOS use 'homebrew install stockfish' and you should be able to leave it as is. If you run Linux use 'sudo apt-get install stockfish' and leave as is. 
+- If you run Windows, put the full or relative path to the engine in StockFishAI.java on line 26: stockfishProcess = new ProcessBuilder("/path/to/engine.exe").start();
+
 
 SimpleAI in Engine run() can be used to generate AI moves if you don't want to download and install Stockfish, just comment out stockFishAI() and un-comment out simpleAI(). However, keep in mind that simpleAI is exactly that; simple. It generates a move by obtaining all available moves for the AI player and picking one at random. Please feel free to try and develop your own generateSimpleAiMove algorithm if that's something you'd be interested in doing. 
 
@@ -32,4 +36,4 @@ To-do's:
    2) Add Settings UI
       1) AI Difficulty Selection
 
-Stockfish is insanely strong. Currently in the process of working out appropriate 'handicaps' to bring down the strength of Stockfish's gameplay. You can do this manually by decreasing its 'thinking' time and depth of search in the AiDifficulty class when it is initialized in class Engine.
+Stockfish is insanely strong. Currently, in the process of working out appropriate 'handicaps' to bring down the strength of Stockfish's gameplay. You can do this manually by decreasing its 'thinking' time and depth of search in the AiDifficulty class when it is initialized in class Engine.
