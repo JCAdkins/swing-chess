@@ -13,6 +13,8 @@ To install Stockfish please visit: https://stockfishchess.org/download/.
 
 SimpleAI in Engine run() can be used to generate AI moves if you don't want to download and install Stockfish, just comment out stockFishAI() and un-comment out simpleAI(). However, keep in mind that simpleAI is exactly that; simple. It generates a move by obtaining all available moves for the AI player and picking one at random. Please feel free to try and develop your own generateSimpleAiMove algorithm if that's something you'd be interested in doing. 
 
+A GUI to choose between players hasn't been implemented yet, so, to play you can either do: PvP or PvE. In /src/engine/Engine.java from lines 74-77 you will see playerOne and playerTwo. Player one can either be Human or AI, as can player two, simply comment out what you don't want it to be and leave the other in. Right now I have player one as a human player and player two as AI.
+
 ==========================================================
 
 Credits:
